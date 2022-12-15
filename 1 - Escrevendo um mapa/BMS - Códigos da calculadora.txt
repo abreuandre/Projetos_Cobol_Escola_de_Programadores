@@ -1,0 +1,98 @@
+Esse Código foi construído para fazer uma calculadora simples com 2 números, um operador matemático e um espaço para o resultádo do cálculo.
+
+
+No QMF vamos fazer um rascunho da calculadora(MEMBER: GR.EAD569.COBLIB.TELACALC):
+
+#A691#                       #CALCULADORA                            #XXXXXXXXXX
+                                                                     #XXXXXXXX
+                                                                        
+              #N1     #OP  #N2     #RESULTADO                           
+              #9999#  #X#  #9999#  #ZZZZZZZ9                            
+                                                                        
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+=======================================================================================
+
+Também no QMF vamos codificar a calculadora(MEMBER: GR.EAD569.COBLIB.AD569M1):
+
+AD569M1 DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES   
+MAPCALC DFHMDI SIZE=24,80                                               
+CODTRAN DFHMDF POS=(1,1),                                              *
+               LENGTH=4,                                               *
+               ATTRB=(UNPROT,BRT,FSET), *                               
+               INITIAL='AAL1'                                           
+********************************************************                
+        DFHMDF POS=(1,6),                                              *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+        DFHMDF POS=(1,30),                                             *
+               LENGTH=11,                                              *
+               ATTRB=ASKIP                                             *
+               INITIAL='CALCULADORA'                                    
+********************************************************                
+DATA    DFHMDF POS=(1,70),                                             *
+               LENGTH=10,                                              *
+               ATTRB=ASKIP                                              
+**********************************************************              
+HORA    DFHMDF POS=(2,70),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP                                              
+********************************************************                
+        DFHMDF POS=(4,15),                                             *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP                                             *
+               INITIAL='N1'                                             
+********************************************************                
+        DFHMDF POS=(4,23),                                             *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP                                             *
+               INITIAL='OP'                                             
+********************************************************                
+        DFHMDF POS=(4,28),                                             *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP                                             *
+               INITIAL='N2'                                             
+********************************************************                
+        DFHMDF POS=(4,36),                                             *
+               LENGTH=09,                                              *
+               ATTRB=ASKIP                                             *
+               INITIAL='RESULTADO'                                      
+********************************************************                
+N1      DFHMDF POS=(5,14),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET,IC),                         *
+               PICIN='9(4)'                                             
+********************************************************                
+        DFHMDF POS=(5,20),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+OP      DFHMDF POS=(5,23),                                             *
+               LENGTH=01,                                              *
+               ATTRB=(UNPROT,BRT,FSET)                                  
+********************************************************                
+        DFHMDF POS=(5,25),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+N2      DFHMDF POS=(5,28),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET),                            *
+               PICIN='9(4)'                                             
+********************************************************                
+        DFHMDF POS=(5,33),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+RESULT  DFHMDF POS=(5,36),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='ZZZZZZZ9'                                        
+********************************************************                
+MSG     DFHMDF POS=(7,01),                                             *
+               LENGTH=79,                                              *
+               ATTRB=ASKIP,                                             
+********************************************************                
+        DFHMSD TYPE=FINAL                                               
+        END                                                             
