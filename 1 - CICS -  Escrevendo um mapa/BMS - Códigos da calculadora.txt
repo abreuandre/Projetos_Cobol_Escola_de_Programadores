@@ -16,10 +16,10 @@ No QMF vamos fazer um rascunho da calculadora(MEMBER: GR.EAD569.COBLIB.TELACALC)
 Também no QMF vamos codificar a calculadora(MEMBER: GR.EAD569.COBLIB.AD569M1):
 
 AD569M1 DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES   
-MAPCALC DFHMDI SIZE=24,80                                               
+MAPCALC DFHMDI SIZE=(24,80)                                               
 CODTRAN DFHMDF POS=(1,1),                                              *
                LENGTH=4,                                               *
-               ATTRB=(UNPROT,BRT,FSET), *                               
+               ATTRB=(UNPROT,BRT,FSET),                                *                               
                INITIAL='AAL1'                                           
 ********************************************************                
         DFHMDF POS=(1,6),                                              *
