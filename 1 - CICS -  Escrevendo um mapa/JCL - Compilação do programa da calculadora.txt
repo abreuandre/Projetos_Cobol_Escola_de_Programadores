@@ -1,0 +1,10 @@
+
+JCL para compilação do programa da calculadora
+
+//EAD569X JOB 'COMP MAPA',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID        
+//*================================================================
+//* JCL PARA COMPILAR MAPAS                                        
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE                       
+//*================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB                           
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569M1,INSTR='EAD569'               

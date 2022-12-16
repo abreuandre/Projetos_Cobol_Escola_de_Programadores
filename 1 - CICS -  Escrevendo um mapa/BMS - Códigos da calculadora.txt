@@ -28,7 +28,7 @@ CODTRAN DFHMDF POS=(1,1),                                              *
 ********************************************************                
         DFHMDF POS=(1,30),                                             *
                LENGTH=11,                                              *
-               ATTRB=ASKIP                                             *
+               ATTRB=ASKIP,                                            *
                INITIAL='CALCULADORA'                                    
 ********************************************************                
 DATA    DFHMDF POS=(1,70),                                             *
@@ -41,22 +41,22 @@ HORA    DFHMDF POS=(2,70),                                             *
 ********************************************************                
         DFHMDF POS=(4,15),                                             *
                LENGTH=02,                                              *
-               ATTRB=ASKIP                                             *
+               ATTRB=ASKIP,                                            *
                INITIAL='N1'                                             
 ********************************************************                
         DFHMDF POS=(4,23),                                             *
                LENGTH=02,                                              *
-               ATTRB=ASKIP                                             *
+               ATTRB=ASKIP,                                            *
                INITIAL='OP'                                             
 ********************************************************                
         DFHMDF POS=(4,28),                                             *
                LENGTH=02,                                              *
-               ATTRB=ASKIP                                             *
+               ATTRB=ASKIP,                                            *
                INITIAL='N2'                                             
 ********************************************************                
         DFHMDF POS=(4,36),                                             *
                LENGTH=09,                                              *
-               ATTRB=ASKIP                                             *
+               ATTRB=ASKIP,                                            *
                INITIAL='RESULTADO'                                      
 ********************************************************                
 N1      DFHMDF POS=(5,14),                                             *
@@ -92,7 +92,7 @@ RESULT  DFHMDF POS=(5,36),                                             *
 ********************************************************                
 MSG     DFHMDF POS=(7,01),                                             *
                LENGTH=79,                                              *
-               ATTRB=ASKIP,                                             
+               ATTRB=ASKIP                                             
 ********************************************************                
         DFHMSD TYPE=FINAL                                               
         END                                                             
