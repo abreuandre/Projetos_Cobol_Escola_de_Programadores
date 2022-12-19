@@ -53,7 +53,7 @@
                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT           
                    MOVE WRK-RET-CICS-EDIT TO MSGO(6:3)             
                    EXEC CICS                                       
-                       RUN                                         
+                       RETURN                                        
                    END-EXEC                                        
            END-EVALUATE.                                           
       **********************************                           
@@ -71,7 +71,9 @@
                    MOVE 'MULTIPLICACAO EFETUADA' TO MSGO       
                WHEN '/'                                        
                    DIVIDE N1I BY N2I GIVING RESULTO            
-                   MOVE 'DIVISAO EFETUADA' TO MSGO             
+                   MOVE 'DIVISAO EFETUADA' TO MSGO
+               WHEN OTHER                          
+                   MOVE 'OPERACAO INVALIDA' TO MSGO.           
            END-EVALUATE.                                       
       **************************************                   
        900-FINALIZAR SECTION.                                  
