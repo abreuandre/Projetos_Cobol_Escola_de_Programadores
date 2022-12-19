@@ -1,0 +1,15 @@
+
+
+GR.EAD569.JOBLIB(COMPCICS)
+
+
+//EAD569XX JOB 'COMPCICS',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID
+//*=================================================       
+//* JCL PARA COMPILAR PROGRAMAS CICS                       
+//*  NAME - NOME DO SEU PROGRAMA                           
+//*  INSTR - SUA CHAVE                                     
+//*=================================================       
+//         JCLLIB ORDER=GR.GERAL.PROCLIB                   
+//*                                                        
+//COMPPLI  EXEC DFHCICS1,NAME=EAD569PA,INSTR='EAD569',     
+//         LIB2='GR.GERAL'                                 
