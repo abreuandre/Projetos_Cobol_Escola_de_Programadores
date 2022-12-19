@@ -1,0 +1,93 @@
+       IDENTIFICATION DIVISION.                                  
+       PROGRAM-ID.                                               
+           AD569P1.                                              
+       AUTHOR.                                                   
+           ANDRE.                                                
+      ******************************************                 
+      *     PROGRAMA CALCULADORA (CICS)        *                 
+      ******************************************                 
+      *                                                          
+       ENVIRONMENT DIVISION.                                     
+       CONFIGURATION SECTION.                                    
+       SPECIAL-NAMES.                                            
+           DECIMAL-POINT IS COMMA.                               
+       INPUT-OUTPUT SECTION.                                     
+       FILE-CONTROL.                                             
+      *
+       DATA DIVISION.                                              
+       FILE SECTION.                                               
+       WORKING-STORAGE SECTION.                                    
+           COPY AD569M1.                                           
+       77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.          
+       77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.               
+       77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.            
+                                                                   
+      *                                                            
+       PROCEDURE DIVISION.                                         
+       000-PRINCIPAL SECTION.                                      
+       001-PRINCIPAL.                                              
+           PERFORM 101-INICIAR.                                    
+           IF WK-MAPA-DESENHADO = 'S'                              
+               PERFORM 201-PROCESSAR                               
+           END-IF.                                                 
+           PERFORM 901-FINALIZAR.
+           EXEC CICS                                             
+               RETURN                                            
+           END-EXEC.                                             
+      **************************************                     
+       100-INICIAR SECTION.                                      
+       101-INICIAR.                                              
+           EXEC CICS RECEIVE                                     
+               MAPSET('AD569M1')                                 
+               MAP('MAPCALC')                                    
+               INTO(MAPCALCI)                                    
+               RESP(WK-RET-CICS)                                 
+           END-EXEC.                                             
+           EVALUATE WK-RET-CICS                                  
+               WHEN DFHRESP(NORMAL)                              
+                   MOVE 'S'  TO WK-MAPA-DESENHADO                
+               WHEN DFHRESP(MAPFAIL)                             
+                   MOVE 'N'  TO WK-MAPA-DESENHADO                
+               WHEN OTHER                                          
+                   MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO            
+                   MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT           
+                   MOVE WRK-RET-CICS-EDIT TO MSGO(6:3)             
+                   EXEC CICS                                       
+                       RUN                                         
+                   END-EXEC                                        
+           END-EVALUATE.                                           
+      **********************************                           
+       200-PROCESSAR SECTION.                                      
+       201-PROCESSAR.                                              
+           EVALUATE OPI                                            
+               WHEN '+'                                            
+                   ADD N1I N2I GIVING RESULTO                      
+                   MOVE 'SOMA EFETUADA' TO MSGO                    
+               WHEN '-'                                            
+                   SUBTRACT N2I FROM N1I GIVING RESULTO            
+                   MOVE 'SUBTRACAO EFETUADA' TO MSGO           
+               WHEN '*'                                        
+                   MULTIPLY  N1I BY N2I GIVING RESULTO         
+                   MOVE 'MULTIPLICACAO EFETUADA' TO MSGO       
+               WHEN '/'                                        
+                   DIVIDE N1I BY N2I GIVING RESULTO            
+                   MOVE 'DIVISAO EFETUADA' TO MSGO             
+           END-EVALUATE.                                       
+      **************************************                   
+       900-FINALIZAR SECTION.                                  
+       901-FINALIZAR.                                          
+           IF WK-MAPA-DESENHADO = 'N'                          
+               EXEC CICS SEND                                  
+                   MAPSET('AD569M1')                           
+                   MAP('MAPCALC')                              
+                   MAPONLY                                     
+                   ERASE                                       
+               END-EXEC                                        
+           ELSE                                                
+               EXEC CICS SEND                                  
+                   MAPSET('AD569M1')                           
+                   MAP('MAPCALC')                              
+                   DATAONLY                                    
+                   FROM(MAPCALCO)                              
+               END-EXEC                                        
+           END-IF.                                                                                                                                    

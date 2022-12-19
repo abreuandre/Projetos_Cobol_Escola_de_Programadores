@@ -59,7 +59,7 @@ HORA    DFHMDF POS=(2,70),                                             *
                ATTRB=ASKIP,                                            *
                INITIAL='RESULTADO'                                      
 ********************************************************                
-N1      DFHMDF POS=(5,14),                                             *
+N1      DFHMDF POS=(5,15),                                             *
                LENGTH=04,                                              *
                ATTRB=(UNPROT,NUM,BRT,FSET,IC),                         *
                PICIN='9(4)'                                             
