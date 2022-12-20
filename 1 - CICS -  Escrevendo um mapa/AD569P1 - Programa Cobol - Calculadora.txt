@@ -21,7 +21,7 @@
        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.          
        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.               
        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.            
-                                                                   
+       77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.                                                            
       *                                                            
        PROCEDURE DIVISION.                                         
        000-PRINCIPAL SECTION.                                      
@@ -58,7 +58,13 @@
            END-EVALUATE.                                           
       **********************************                           
        200-PROCESSAR SECTION.                                      
-       201-PROCESSAR.                                              
+       201-PROCESSAR.
+           EXEC CICS BIF         
+               DEEDIT FIELD(N1I) 
+           END-EXEC.             
+           EXEC CICS BIF         
+               DEEDIT FIELD(N2I) 
+           END-EXEC.                                                          
            EVALUATE OPI                                            
                WHEN '+'                                            
                    ADD N1I N2I GIVING RESULTO                      
@@ -74,10 +80,21 @@
                    MOVE 'DIVISAO EFETUADA' TO MSGO
                WHEN OTHER                          
                    MOVE 'OPERACAO INVALIDA' TO MSGO.           
-           END-EVALUATE.                                       
+           END-EVALUATE.
+           MOVE LOW-VALUES TO N1O N2O.                           
       **************************************                   
        900-FINALIZAR SECTION.                                  
-       901-FINALIZAR.                                          
+       901-FINALIZAR.
+           EXEC CICS ASKTIME    
+               ABSTIME(WK-DATA) 
+           END-EXEC.            
+           EXEC CICS FORMATTIME 
+               ABSTIME(WK-DATA) 
+               DDMMYYYY(DATAO)  
+               DATESEP('/')     
+               TIME(HORAO)      
+               TIMESEP(':')     
+           END-EXEC.                                                
            IF WK-MAPA-DESENHADO = 'N'                          
                EXEC CICS SEND                                  
                    MAPSET('AD569M1')                           

@@ -11,5 +11,5 @@ GR.EAD569.JOBLIB(COMPCICS)
 //*=================================================       
 //         JCLLIB ORDER=GR.GERAL.PROCLIB                   
 //*                                                        
-//COMPPLI  EXEC DFHCICS1,NAME=EAD569PA,INSTR='EAD569',     
+//COMPPLI  EXEC DFHCICS1,NAME=AD569P1,INSTR='EAD569',     
 //         LIB2='GR.GERAL'                                 
