@@ -1,0 +1,127 @@
+CICS - DESENHANDO O MENU
+
+GR.EAD569.COBLIB(PROJETO) - 01.00
+
+TRANS MAPA    PROGRAMA    FUNCAO
+----- ----    --------    ------
+AADA  AD569MA AD569PA     MENU
+AADB  AD569MB AD569PB     CONSULTA
+AADC  AD569MC AD569PC     INCLUSAO
+AADD  AD569MD AD569PD     EXCLUSAO
+AADE  AD569ME AD569PE     ALTERACAO
+
+--------------------------------------------------------------------------------------
+
+#A69A#                  #MENU DE FUNCIONARIOS                        #XXXXXXXXXX
+                                                                     #XXXXXXXX
+                                                                        
+              #CODIGO DO FUNCIONARIO#XXXX#O                             
+                                                                        
+              #.#CONSULTA                                               
+              #.#INCLUSAO                                               
+              #.#EXCLUSAO                                               
+              #.#ALTERACAO                                              
+                                                                        
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+--------------------------------------------------------------------------------------
+
+GR.EAD569.COBLIB(AD569MA) - 01.00
+
+AD569MA DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES   
+MAPMENU DFHMDI SIZE=(24,80)                                             
+CODTRAN DFHMDF POS=(1,1),                                              *
+               LENGTH=4,                                               *
+               ATTRB=(UNPROT,BRT,FSET),                                *
+               INITIAL='EADA'                                           
+********************************************************                
+        DFHMDF POS=(1,6),                                              *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+        DFHMDF POS=(1,25),                                             *
+               LENGTH=20,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='MENU DE FUNCIONARIOS'                           
+********************************************************                
+DATA    DFHMDF POS=(1,70),                                             *
+               LENGTH=10,                                              *
+               ATTRB=ASKIP                                              
+**********************************************************              
+HORA    DFHMDF POS=(2,70),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP                                              
+**********************************************************              
+        DFHMDF POS=(4,15),                                             *
+               LENGTH=21,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='CODIGO DO FUNCIONARIO'                          
+**********************************************************              
+CODIGO  DFHMDF POS=(4,37),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET,IC)                           
+**********************************************************              
+        DFHMDF POS=(4,42),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP                                              
+********************************************************                
+        DFHMDF POS=(6,15),                                             *
+               LENGTH=01,                                              *
+               ATTRB=(UNPROT,BRT),                                     *
+               INITIAL='.'                                              
+**********************************************************              
+        DFHMDF POS=(6,17),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='CONSULTA'                                       
+**********************************************************              
+        DFHMDF POS=(7,15),                                             *
+               LENGTH=01,                                              *
+               ATTRB=(UNPROT,BRT),                                     *
+               INITIAL='.'                                              
+**********************************************************              
+        DFHMDF POS=(7,17),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='INCLUSAO'                                       
+**********************************************************              
+        DFHMDF POS=(8,15),                                             *
+               LENGTH=01,                                              *
+               ATTRB=(UNPROT,BRT),                                     *
+               INITIAL='.'                                              
+**********************************************************              
+        DFHMDF POS=(8,17),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='EXCLUSAO'                                       
+**********************************************************              
+        DFHMDF POS=(9,15),                                             *
+               LENGTH=01,                                              *
+               ATTRB=(UNPROT,BRT),                                     *
+               INITIAL='.'                                              
+**********************************************************              
+        DFHMDF POS=(9,17),                                             *
+               LENGTH=09,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='ALTERACAO'                                      
+**********************************************************              
+MSG     DFHMDF POS=(11,01),                                            *
+               LENGTH=79,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='ESCOLHA UMA FUNCAO E <ENTER>'                   
+**********************************************************              
+        DFHMSD TYPE=FINAL                                               
+        END                                                             
+-------------------------------------------------------------------------------
+
+JCL - COMPMAPA
+
+GR.EAD569.JOBLIB(COMPMAPA) - 01.03
+
+//EAD569X JOB 'COMP MAPA',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID        
+//*================================================================
+//* JCL PARA COMPILAR MAPAS                                        
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE                       
+//*================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB                           
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569MA,INSTR='EAD569'               
