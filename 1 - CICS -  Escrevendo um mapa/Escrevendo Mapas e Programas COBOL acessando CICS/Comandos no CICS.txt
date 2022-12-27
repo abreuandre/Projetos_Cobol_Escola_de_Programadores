@@ -1,0 +1,6 @@
+COMANDOS NO CICS:
+
+ceda def prog - usado para cadastrar o programa
+def trans - define a transação
+dis gr(nomedogrupo) - instala os programas e transações levando-s para a memória
+cemt set prog(nomedoprograma) new - traz uma cópia do programa

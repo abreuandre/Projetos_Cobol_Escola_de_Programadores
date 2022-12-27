@@ -1,0 +1,107 @@
+Menu - Codificando e compilando
+
+
+GR.EAD569.COBLIB(AD569PA) - 01.00
+
+
+        IDENTIFICATION DIVISION.                                        
+        PROGRAM-ID.                                                     
+            AD569PA.                                                    
+        AUTHOR.                                                         
+            ANDRE.                                                      
+       ******************************************                       
+       *     MENU DE FUNCIONARIOS (CICS)        *                       
+       ******************************************                       
+       *                                                                
+        ENVIRONMENT DIVISION.                                           
+        CONFIGURATION SECTION.                                          
+        SPECIAL-NAMES.                                                  
+            DECIMAL-POINT IS COMMA.                                     
+        INPUT-OUTPUT SECTION.                                           
+        FILE-CONTROL.                                                   
+       * 
+        DATA DIVISION.                                                  
+        FILE SECTION.                                                   
+        WORKING-STORAGE SECTION.                                        
+            COPY AD569MA.                                               
+        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+        77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.            
+       *                                                                
+        PROCEDURE DIVISION.                                             
+        000-PRINCIPAL SECTION.                                          
+        001-PRINCIPAL.                                                  
+            PERFORM 101-INICIAR.                                        
+            IF WK-MAPA-DESENHADO = 'S'                                  
+                PERFORM 201-PROCESSAR                                   
+            END-IF.                                                     
+            PERFORM 901-FINALIZAR.   
+            EXEC CICS                                                   
+                RETURN                                                  
+            END-EXEC.                                                   
+       **************************************                           
+        100-INICIAR SECTION.                                            
+        101-INICIAR.                                                    
+            EXEC CICS RECEIVE                                           
+                MAPSET('AD569MA')                                       
+                MAP('MAPMENU')                                          
+                INTO(MAPMENUI)                                          
+                RESP(WK-RET-CICS)                                       
+            END-EXEC.                                                   
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    MOVE 'S'  TO WK-MAPA-DESENHADO                      
+                WHEN DFHRESP(MAPFAIL)                                   
+                    MOVE 'N'  TO WK-MAPA-DESENHADO                      
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
+                    EXEC CICS                                           
+                        RETURN                                          
+                    END-EXEC                                            
+            END-EVALUATE.                                               
+       **********************************                               
+        200-PROCESSAR SECTION.                                          
+        201-PROCESSAR.                                                  
+            EVALUATE EIBCPOSN                                           
+                WHEN 415                                                
+                    MOVE 'CONSULTA NAO PROGRAMADA' TO MSGO              
+                WHEN 495                                                
+                    MOVE 'INCLUSAO NAO PROGRAMADA' TO MSGO              
+                WHEN 575                                                 
+                    MOVE 'EXCLUSAO NAO PROGRAMADA' TO MSGO              
+                WHEN 655                                                
+                    MOVE 'ALTERACAO NAO PROGRAMADA' TO MSGO             
+                WHEN OTHER                                              
+                    MOVE 'FAVOR COLOCAR O CURSOR EM UMA FUNCAO' TO MSGO 
+            END-EVALUATE.                                               
+       **************************************                           
+        900-FINALIZAR SECTION.                                          
+        901-FINALIZAR.                                                  
+            EXEC CICS ASKTIME                                           
+                ABSTIME(WK-DATA)                                        
+            END-EXEC.                                                   
+            EXEC CICS FORMATTIME                                        
+                ABSTIME(WK-DATA)                                        
+                DDMMYYYY(DATAO)                                         
+                DATESEP('/')                                            
+                TIME(HORAO)                                             
+                TIMESEP(':')                                            
+            END-EXEC.                                                   
+            IF WK-MAPA-DESENHADO = 'N'                                  
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    MAPONLY                                             
+                    ERASE                                               
+                END-EXEC                                                
+            ELSE                                                        
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    DATAONLY                                            
+                    FROM(MAPMENUO)                                      
+                END-EXEC                                                
+            END-IF.                                                                                                                                                      
