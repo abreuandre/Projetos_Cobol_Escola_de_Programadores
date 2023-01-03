@@ -1,0 +1,466 @@
+Escrevendo o programa consulta - Parte 1
+
+
+GR.EAD569.COBLIB(AD569MB) - 01.01
+
+AD569MB DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES
+MAPCONS DFHMDI SIZE=(24,80)
+*****************************************************
+        DFHMDF POS=(1,25),                                             *
+               LENGTH=21,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='CONSULTA FUNCIONARIOS'
+*****************************************************
+DATA    DFHMDF POS=(1,70),                                             *
+               LENGTH=10,                                              *
+               ATTRB=ASKIP
+*****************************************************
+HORA    DFHMDF POS=(2,70),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(4,15),                                             *
+               LENGTH=21,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='CODIGO DO FUNCIONARIO'
+*****************************************************
+CODIGO  DFHMDF POS=(4,37),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,BRT,FSET,IC)
+*****************************************************
+        DFHMDF POS=(4,42),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(6,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='NOME         :'
+*****************************************************
+NOME    DFHMDF POS=(6,30),                                             *
+               LENGTH=30,                                              *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(7,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='SALARIO      :'
+*****************************************************
+SALINT  DFHMDF POS=(7,30),                                             *
+               LENGTH=06,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='ZZZZZ9'
+*****************************************************
+        DFHMDF POS=(7,37),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL=','
+*****************************************************
+SALDEC  DFHMDF POS=(7,39),                                             *
+               LENGTH=06,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='99'
+*****************************************************
+        DFHMDF POS=(8,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='DEPARTAMENTO :'
+*****************************************************
+DEPTO   DFHMDF POS=(8,30),                                             *
+               LENGTH=03,                                              *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(9,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='ADMISSAO     :'
+*****************************************************
+DIAADM  DFHMDF POS=(9,30),                                             *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='99'
+*****************************************************
+        DFHMDF POS=(9,33),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='/'
+*****************************************************
+MESADM  DFHMDF POS=(9,35),                                             *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='99'
+*****************************************************
+        DFHMDF POS=(9,38),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='/'
+*****************************************************
+ANOADM  DFHMDF POS=(9,40),                                             *
+               LENGTH=04,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='9999'
+*****************************************************
+        DFHMDF POS=(10,15),                                            *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='IDADE        :'
+*****************************************************
+IDADE   DFHMDF POS=(10,30),                                            *
+               LENGTH=02,                                              *
+               ATTRB=ASKIP,                                            *
+               PICOUT='99'
+*****************************************************
+        DFHMDF POS=(11,15),                                            *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='EMAIL        :'
+*****************************************************
+EMAIL   DFHMDF POS=(11,30),                                            *
+               LENGTH=30,                                              *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(13,01),                                            *
+               LENGTH=42,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='F3-MENU  F7-ANTERIOR  F8-PROXIMO  F12-EXIT'
+*****************************************************
+MSG     DFHMDF POS=(15,01),
+        LENGTH=79,
+        ATTRB=ASKIP
+*****************************************************
+        DFHMSD TYPE=FINAL
+        END
+
+
+-----------------------------------------------------------------------------------------------------------------------
+PARA COMPILAR O PROGRAMA ACIMA:
+
+GR.EAD569.JOBLIB(COMPMAPA) - 01.08
+
+//ALUNOMAP JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=ALUNO
+//*=================================================================
+//* JCL PARA COMPILAR MAPAS
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE
+//*=================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569MB,INSTR='EAD569'
+
+--------------------------------------------------------------------------------------------
+
+
+GR.EAD569.COBLIB(AD569PA) - 01.00
+
+
+        IDENTIFICATION DIVISION.                                        
+        PROGRAM-ID.                                                     
+            AD569PA.                                                    
+        AUTHOR.                                                         
+            ANDRE.                                                      
+       ******************************************                       
+       *     MENU DE FUNCIONARIOS (CICS)        *                       
+       ******************************************                       
+       *                                                                
+        ENVIRONMENT DIVISION.                                           
+        CONFIGURATION SECTION.                                          
+        SPECIAL-NAMES.                                                  
+            DECIMAL-POINT IS COMMA.                                     
+        INPUT-OUTPUT SECTION.                                           
+        FILE-CONTROL.                                                   
+       * 
+        DATA DIVISION.                                                  
+        FILE SECTION.                                                   
+        WORKING-STORAGE SECTION.                                        
+            COPY AD569MA.
+        01  WK-AREA-COM.
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
+        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+        77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
+        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.         
+       *                                                                
+        PROCEDURE DIVISION.                                             
+        000-PRINCIPAL SECTION.                                          
+        001-PRINCIPAL.                                                  
+            PERFORM 101-INICIAR.                                        
+            IF WK-MAPA-DESENHADO = 'S'                                  
+                PERFORM 201-PROCESSAR                                   
+            END-IF.                                                     
+            PERFORM 901-FINALIZAR.   
+            EXEC CICS                                                   
+                RETURN                                                  
+            END-EXEC.                                                   
+       **************************************                           
+        100-INICIAR SECTION.                                            
+        101-INICIAR.                                                    
+            EXEC CICS RECEIVE                                           
+                MAPSET('AD569MA')                                       
+                MAP('MAPMENU')                                          
+                INTO(MAPMENUI)                                          
+                RESP(WK-RET-CICS)                                       
+            END-EXEC.                                                   
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    MOVE 'S'  TO WK-MAPA-DESENHADO                      
+                WHEN DFHRESP(MAPFAIL)                                   
+                    MOVE 'N'  TO WK-MAPA-DESENHADO                      
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
+                    EXEC CICS                                           
+                        RETURN                                          
+                    END-EXEC                                            
+            END-EVALUATE.                                               
+       **********************************                               
+        200-PROCESSAR SECTION.                                          
+        201-PROCESSAR.                                                  
+            EVALUATE EIBCPOSN                                           
+                WHEN 415
+                    MOVE 'AD569PB'  TO WK-PROGRAMA
+                    PERFORM 202-CALL
+                WHEN 495                                                
+                    MOVE 'INCLUSAO NAO PROGRAMADA' TO MSGO              
+                WHEN 575                                                 
+                    MOVE 'EXCLUSAO NAO PROGRAMADA' TO MSGO              
+                WHEN 655                                                
+                    MOVE 'ALTERACAO NAO PROGRAMADA' TO MSGO             
+                WHEN OTHER                                              
+                    MOVE 'FAVOR COLOCAR O CURSOR EM UMA FUNCAO' TO MSGO 
+            END-EVALUATE.
+        202-CALL.
+            MOVE CODIGOI TO WK-CODFUN-COM.
+            EXEC CICS XCTL
+                PROGRAM(WK-PROGRAMA)
+                COMMAREA(WK-AREA-COM)
+                RESP(WK-RET-CICS)
+            END-EXEC.
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    CONTINUE                      
+                WHEN DFHRESP(PGMIDERR)                                   
+                    MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
+                    MOVE WK-PROGRAMA TO MSGO(10:8)
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
+                    EXEC CICS                                           
+                        RETURN                                          
+                    END-EXEC                                            
+            END-EVALUATE.                                        
+       **************************************                           
+        900-FINALIZAR SECTION.                                          
+        901-FINALIZAR.                                                  
+            EXEC CICS ASKTIME                                           
+                ABSTIME(WK-DATA)                                        
+            END-EXEC.                                                   
+            EXEC CICS FORMATTIME                                        
+                ABSTIME(WK-DATA)                                        
+                DDMMYYYY(DATAO)                                         
+                DATESEP('/')                                            
+                TIME(HORAO)                                             
+                TIMESEP(':')                                            
+            END-EXEC.                                                   
+            IF WK-MAPA-DESENHADO = 'N'                                  
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    MAPONLY                                             
+                    ERASE                                               
+                END-EXEC                                                
+            ELSE                                                        
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    DATAONLY                                            
+                    FROM(MAPMENUO)                                      
+                END-EXEC                                                
+            END-IF.
+
+
+GR.EAD569.JOBLIB(COMPCICS)
+
+
+//EAD569XX JOB 'COMPCICS',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID
+//*=================================================       
+//* JCL PARA COMPILAR PROGRAMAS CICS                       
+//*  NAME - NOME DO SEU PROGRAMA                           
+//*  INSTR - SUA CHAVE                                     
+//*=================================================       
+//         JCLLIB ORDER=GR.GERAL.PROCLIB                   
+//*                                                        
+//COMPPLI  EXEC DFHCICS1,NAME=AD569PA,INSTR='EAD569',     
+//         LIB2='GR.GERAL'             
+
+
+
+
+GR.EAD569.COBLIB(AD569PB) - 01.00
+
+
+        IDENTIFICATION DIVISION.                                        
+        PROGRAM-ID.                                                     
+            AD569PB.                                                    
+        AUTHOR.                                                         
+            ANDRE.                                                      
+       ******************************************                       
+       *     CONSULTA FUNCIONARIOS (CICS)       *                       
+       ******************************************                       
+       *                                                                
+        ENVIRONMENT DIVISION.                                           
+        CONFIGURATION SECTION.                                          
+        SPECIAL-NAMES.                                                  
+            DECIMAL-POINT IS COMMA.                                     
+        INPUT-OUTPUT SECTION.                                           
+        FILE-CONTROL.                                                   
+       * 
+        DATA DIVISION.                                                  
+        FILE SECTION.                                                   
+        WORKING-STORAGE SECTION.                                        
+            COPY AD569MB.
+            COPY DFHAID.
+            EXEC SQL
+                INCLUDE BOOKFUNC
+            END-EXEC.
+            EXEC SQL
+                INCLUDE SQLCA
+            END EXEC.
+        77  WK-SALARIO-EDIT    PIC ZZZ.ZZ9,99  VALUE ZEROS.
+        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.
+        01  WK-AREA-COM.
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
+        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+        77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
+        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
+        LINKAGE SECTION.
+        01  DFHCOMMAREA.
+            05 LK-CODFUN     PIC (4).
+       *
+        PROCEDURE DIVISION.                                             
+        000-PRINCIPAL SECTION.                                          
+        001-PRINCIPAL.                                                  
+            PERFORM 101-INICIAR.                                        
+            IF WK-MAPA-DESENHADO = 'S'                                  
+                PERFORM 201-PROCESSAR                                   
+            END-IF.                                                     
+            PERFORM 901-FINALIZAR.   
+            EXEC CICS                                                   
+                RETURN                                                  
+            END-EXEC.                                                   
+       **************************************                           
+        100-INICIAR SECTION.                                            
+        101-INICIAR.
+            MOVE LOW-VALUES TO MAPMENUI.
+            IF EIBCALEN > 0
+                PERFORM 102-LE-COMMAREA
+            ELSE
+                PERFORM 103-LE-TELA
+            END-IF.
+        102-LE-COMMAREA
+            MOVE LK-CODFUN TO CODIGOI.
+        103-LE-TELA.
+            EXEC CICS RECEIVE                                           
+                MAPSET('AD569MB')                                       
+                MAP('MAPCONS')                                          
+                INTO(MAPCONSI)                                          
+                RESP(WK-RET-CICS)                                       
+            END-EXEC.                                                   
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    MOVE 'S'  TO WK-MAPA-DESENHADO                      
+                WHEN DFHRESP(MAPFAIL)
+                    MOVE 'FAVOR INICIAR PELO MENU' TO MSGO
+                    EXEC CICS SEND TEXT
+                        FIELD(MSGO)
+                        ERASE
+                        FREEKB
+                    END-EXEC
+                    EXEC CICS
+                        RETURN
+                    END-EXEC           
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    EXEC CICS SEND TEXT
+                        FIELD(MSGO)
+                        ERASE
+                        FREEKB
+                    END-EXEC
+                    EXEC CICS                                           
+                        RETURN                                          
+                    END-EXEC                                            
+            END-EVALUATE.                                               
+       **********************************                               
+        200-PROCESSAR SECTION.                                          
+        201-PROCESSAR.
+            EVALUATE EIBAID
+               WHEN DFHPF3
+                   PERFORM 202-CALL
+               WHEN DFHPF7
+                   PERFORM 210-LE-ANTERIOR
+               WHEN DFHPF8
+                   PERFORM 211-LE-PROXIMO
+               WHEN DFHPF12
+                   EXEC CICS
+                       RETURN
+                   END-EXEC.
+               WHEN OTHER
+                   PERFORM 212-LE-FUNCIONARIO
+            END-EVALUATE.
+        202-CALL.
+            MOVE CODIGOI TO WK-CODFUN-COM.
+            EXEC CICS XCTL
+                PROGRAM(WK-PROGRAMA)
+                COMMAREA(WK-AREA-COM)
+                RESP(WK-RET-CICS)
+            END-EXEC.
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    CONTINUE                      
+                WHEN DFHRESP(PGMIDERR)                                   
+                    MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
+                    MOVE WK-PROGRAMA TO MSGO(10:8)
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
+                    EXEC CICS                                           
+                        RETURN                                          
+                    END-EXEC                                            
+            END-EVALUATE.                                        
+       **************************************                           
+        900-FINALIZAR SECTION.                                          
+        901-FINALIZAR.                                                  
+            EXEC CICS ASKTIME                                           
+                ABSTIME(WK-DATA)                                        
+            END-EXEC.                                                   
+            EXEC CICS FORMATTIME                                        
+                ABSTIME(WK-DATA)                                        
+                DDMMYYYY(DATAO)                                         
+                DATESEP('/')                                            
+                TIME(HORAO)                                             
+                TIMESEP(':')                                            
+            END-EXEC.                                                   
+            IF WK-MAPA-DESENHADO = 'N'                                  
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    MAPONLY                                             
+                    ERASE                                               
+                END-EXEC                                                
+            ELSE                                                        
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MA')                                   
+                    MAP('MAPMENU')                                      
+                    DATAONLY                                            
+                    FROM(MAPMENUO)                                      
+                END-EXEC                                                
+            END-IF.
+
+
+
+
