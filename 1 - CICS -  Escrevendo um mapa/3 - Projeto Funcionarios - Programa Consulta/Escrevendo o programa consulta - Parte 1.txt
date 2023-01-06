@@ -192,7 +192,8 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
             END-EXEC.                                                   
        **************************************                           
         100-INICIAR SECTION.                                            
-        101-INICIAR.                                                    
+        101-INICIAR.
+            MOVE LOW-VALUES TO MAPMENUI.
             EXEC CICS RECEIVE                                           
                 MAPSET('AD569MA')                                       
                 MAP('MAPMENU')                                          
@@ -204,13 +205,18 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
                     MOVE 'S'  TO WK-MAPA-DESENHADO                      
                 WHEN DFHRESP(MAPFAIL)                                   
                     MOVE 'N'  TO WK-MAPA-DESENHADO                      
-                WHEN OTHER                                              
-                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
-                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
-                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
-                    EXEC CICS                                           
-                        RETURN                                          
-                    END-EXEC                                            
+                WHEN OTHER
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    EXEC CICS SEND TEXT
+                        FROM(MSGO)
+                        ERASE
+                        FREEKB
+                    END-EXEC
+                    EXEC CICS
+                        RETURN
+                    END-EXEC
             END-EVALUATE.                                               
        **********************************                               
         200-PROCESSAR SECTION.                                          
@@ -242,7 +248,7 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
                     MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
                     MOVE WK-PROGRAMA TO MSGO(10:8)
                 WHEN OTHER                                              
-                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
                     MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
                     MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
                     EXEC CICS                                           
@@ -326,10 +332,13 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             EXEC SQL
                 INCLUDE SQLCA
             END EXEC.
-        77  WK-SALARIO-EDIT    PIC ZZZ.ZZ9,99  VALUE ZEROS.
-        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.
         01  WK-AREA-COM.
-            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.
+        01  WK-SALARIO-ALFA.
+            03 WK-SALINT-ALFA  PIC 9(6) VALUE ZEROS.
+            03 WK-SALDEC-ALFA  PIC 9(2) VALUE ZEROS.
+        77  WK-SQLCODE-EDIT    PIC -999        VALUE ZEROS.
+        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.                                               
         77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
         77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
         77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
@@ -343,9 +352,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
         000-PRINCIPAL SECTION.                                          
         001-PRINCIPAL.                                                  
             PERFORM 101-INICIAR.                                        
-            IF WK-MAPA-DESENHADO = 'S'                                  
-                PERFORM 201-PROCESSAR                                   
-            END-IF.                                                     
+            PERFORM 201-PROCESSAR.                                   
             PERFORM 901-FINALIZAR.   
             EXEC CICS                                                   
                 RETURN                                                  
@@ -359,7 +366,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             ELSE
                 PERFORM 103-LE-TELA
             END-IF.
-        102-LE-COMMAREA
+        102-LE-COMMAREA.
             MOVE LK-CODFUN TO CODIGOI.
         103-LE-TELA.
             EXEC CICS RECEIVE                                           
@@ -386,7 +393,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                     MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
                     MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
                     EXEC CICS SEND TEXT
-                        FIELD(MSGO)
+                        FROM(MSGO)
                         ERASE
                         FREEKB
                     END-EXEC
@@ -413,6 +420,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             END-EVALUATE.
         202-CALL.
             MOVE CODIGOI TO WK-CODFUN-COM.
+            MOVE 'AD569PA'  TO WK-PROGRAMA.
             EXEC CICS XCTL
                 PROGRAM(WK-PROGRAMA)
                 COMMAREA(WK-AREA-COM)
@@ -425,13 +433,124 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                     MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
                     MOVE WK-PROGRAMA TO MSGO(10:8)
                 WHEN OTHER                                              
-                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
                     MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
-                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)                  
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    EXEC CICS SEND TEXT
+                        FIELD(MSGO)
+                        ERASE
+                        FREEKB
+                    END-EXEC
                     EXEC CICS                                           
                         RETURN                                          
                     END-EXEC                                            
-            END-EVALUATE.                                        
+            END-EVALUATE.
+        210-LE-ANTERIOR.
+            MOVE SPACES  TO DB2-NOMEFUN-TEXT.
+            MOVE SPACES  TO DB2-EMAILFUN-TEXT.
+            MOVE CODIGO1 TO DB2-CODFUN.
+            EXEC SQL
+                SELECT *
+                    INTO :DB2-CODFUN,
+                         :DB2-NOMEFUN,
+                         :DB2-SALARIOFUN,
+                         :DB2-DEPTOFUN,
+                         :DB2-ADMISSFUN,
+                         :DB2-IDADEFUN,
+                         :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
+                FROM EAD569.FUNCIONARIOS
+                WHERE CODFUN < :DB2-CODFUN
+                FETCH FIRST ROW ONLY
+                ORDER BY CODFUN DESC
+            END-EXEC.
+            IF WK-INDICATOR-EMAIL = -1
+                MOVE '----------------' TO DB2-EMAILFUN
+            END-IF.
+            EVALUATE SQL CODE
+                WHEN 0
+                    PERFORM 213-CARREGA-TELA
+                WHEN 100
+                    MOVE 'FIM DA TABELA' TO MSGO
+                WHEN OTHER
+                    MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                    MOVE 'ERRO XXXX NO COMANDO SELECT'  TO MSGO
+                    MOVE WK-SQLCODE-EDIT TO MSGO(6:4)
+            END-EVALUATE.
+          211-LE-PROXIMO.
+            MOVE SPACES  TO DB2-NOMEFUN-TEXT.
+            MOVE SPACES  TO DB2-EMAILFUN-TEXT.
+            MOVE CODIGO1 TO DB2-CODFUN.
+            EXEC SQL
+                SELECT *
+                    INTO :DB2-CODFUN,
+                         :DB2-NOMEFUN,
+                         :DB2-SALARIOFUN,
+                         :DB2-DEPTOFUN,
+                         :DB2-ADMISSFUN,
+                         :DB2-IDADEFUN,
+                         :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
+                FROM EAD569.FUNCIONARIOS
+                WHERE CODFUN > :DB2-CODFUN
+                FETCH FIRST ROW ONLY
+                ORDER BY CODFUN ASC
+            END-EXEC.
+            IF WK-INDICATOR-EMAIL = -1
+                MOVE '----------------' TO DB2-EMAILFUN
+            END-IF.
+            EVALUATE SQL CODE
+                WHEN 0
+                    PERFORM 213-CARREGA-TELA
+                WHEN 100
+                    MOVE 'FIM DA TABELA' TO MSGO
+                WHEN OTHER
+                    MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                    MOVE 'ERRO XXXX NO COMANDO SELECT'  TO MSGO
+                    MOVE WK-SQLCODE-EDIT TO MSGO(6:4)
+            END-EVALUATE.
+        212-LE-FUNCIONARIO.
+            MOVE SPACES  TO DB2-NOMEFUN-TEXT.
+            MOVE SPACES  TO DB2-EMAILFUN-TEXT.
+            MOVE CODIGO1 TO DB2-CODFUN.
+            EXEC SQL
+                SELECT *
+                    INTO :DB2-CODFUN,
+                         :DB2-NOMEFUN,
+                         :DB2-SALARIOFUN,
+                         :DB2-DEPTOFUN,
+                         :DB2-ADMISSFUN,
+                         :DB2-IDADEFUN,
+                         :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
+                FROM EAD569.FUNCIONARIOS
+                WHERE CODFUN = :DB2-CODFUN
+                FETCH FIRST ROW ONLY
+                ORDER BY CODFUN ASC
+            END-EXEC.
+            IF WK-INDICATOR-EMAIL = -1
+                MOVE '----------------' TO DB2-EMAILFUN
+            END-IF.
+            EVALUATE SQL CODE
+                WHEN 0
+                    PERFORM 213-CARREGA-TELA
+                WHEN 100
+                    MOVE 'FUNCIONARIO XXXX NAO EXISTE' TO MSGO
+                    MOVE DB2-CODFUN  TO MSGO(13:4)
+                WHEN OTHER
+                    MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                    MOVE 'ERRO XXXX NO COMANDO SELECT'  TO MSGO
+                    MOVE WK-SQLCODE-EDIT TO MSGO(6:4)
+            END-EVALUATE.
+        213-CARREGA-TELA.
+            MOVE DB2-CODFUN TO CODIGOO.
+            MOVE DB2-NOMEFUN-TEXT TO NOMEO.
+            MOVE DB2-SALARIOFUN   TO WK-SALARIO-ALFA.
+            MOVE WK-SALINT-ALFA   TO SALINTO.
+            MOVE WK-SALDEC-ALFA   TO SALDECO.
+            MOVE DB2-DEPTOFUN     TO DEPTOO.
+            MOVE DB2-ADMISSFUN(9:2) TO ADMDIAO.
+            MOVE DB2-ADMISSFUN(6:2) TO ADMMESO.
+            MOVE DB2-ADMISSFUN(1:4) TO ADMANOO.
+            MOVE DB2-IDADEFUN       TO IDADEO.
+            MOVE DB2-EMAILFUN-TEXT  TO EMAILO.
        **************************************                           
         900-FINALIZAR SECTION.                                          
         901-FINALIZAR.                                                  
@@ -445,19 +564,19 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                 TIME(HORAO)                                             
                 TIMESEP(':')                                            
             END-EXEC.                                                   
-            IF WK-MAPA-DESENHADO = 'N'                                  
+            IF EIBCALEN > 0                                  
                 EXEC CICS SEND                                          
-                    MAPSET('AD569MA')                                   
-                    MAP('MAPMENU')                                      
-                    MAPONLY                                             
-                    ERASE                                               
-                END-EXEC                                                
+                    MAPSET('AD569MB')                                   
+                    MAP('MAPCONS')
+                    ERASE
+                    FROM(MAPCONSO)
+                END-EXEC
             ELSE                                                        
                 EXEC CICS SEND                                          
-                    MAPSET('AD569MA')                                   
-                    MAP('MAPMENU')                                      
+                    MAPSET('AD569MB')                                   
+                    MAP('MAPCONS')                                      
                     DATAONLY                                            
-                    FROM(MAPMENUO)                                      
+                    FROM(MAPCONSO)                                      
                 END-EXEC                                                
             END-IF.
 
