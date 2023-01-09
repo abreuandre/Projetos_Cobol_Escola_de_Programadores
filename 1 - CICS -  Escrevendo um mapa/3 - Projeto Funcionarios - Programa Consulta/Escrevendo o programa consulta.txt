@@ -332,21 +332,20 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             EXEC SQL
                 INCLUDE SQLCA
             END EXEC.
-        01  WK-AREA-COM.
-            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.
-        01  WK-SALARIO-ALFA.
-            03 WK-SALINT-ALFA  PIC 9(6) VALUE ZEROS.
-            03 WK-SALDEC-ALFA  PIC 9(2) VALUE ZEROS.
+        01  WK-SALARIO-NUM     PIC 9(6)V99     VALUE ZEROS.
+        01  WK-SALARIO-ALFA    REDEFINES WK-SALARIO-NUM.
+            03 WK-SALINT-ALFA  PIC 9(6).
+            03 WK-SALDEC-ALFA  PIC 9(2).
         77  WK-SQLCODE-EDIT    PIC -999        VALUE ZEROS.
         77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.                                               
-        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
-        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
+        77  WK-RET-CICS      PIC S9(4)   COMP  VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9           VALUE ZEROS.                   
         77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
         77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
         77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
         LINKAGE SECTION.
         01  DFHCOMMAREA.
-            05 LK-CODFUN     PIC (4).
+            05 LK-CODFUN     PIC X(4).
        *
         PROCEDURE DIVISION.                                             
         000-PRINCIPAL SECTION.                                          
@@ -355,7 +354,8 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             PERFORM 201-PROCESSAR.                                   
             PERFORM 901-FINALIZAR.   
             EXEC CICS                                                   
-                RETURN                                                  
+                RETURN
+                TRANSID('AADB')
             END-EXEC.                                                   
        **************************************                           
         100-INICIAR SECTION.                                            
@@ -381,7 +381,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                 WHEN DFHRESP(MAPFAIL)
                     MOVE 'FAVOR INICIAR PELO MENU' TO MSGO
                     EXEC CICS SEND TEXT
-                        FIELD(MSGO)
+                        FROM(MSGO)
                         ERASE
                         FREEKB
                     END-EXEC
@@ -414,7 +414,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                WHEN DFHPF12
                    EXEC CICS
                        RETURN
-                   END-EXEC.
+                   END-EXEC
                WHEN OTHER
                    PERFORM 212-LE-FUNCIONARIO
             END-EVALUATE.
@@ -448,7 +448,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
         210-LE-ANTERIOR.
             MOVE SPACES  TO DB2-NOMEFUN-TEXT.
             MOVE SPACES  TO DB2-EMAILFUN-TEXT.
-            MOVE CODIGO1 TO DB2-CODFUN.
+            MOVE CODIGOI TO DB2-CODFUN.
             EXEC SQL
                 SELECT *
                     INTO :DB2-CODFUN,
@@ -460,8 +460,8 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                          :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
                 FROM EAD569.FUNCIONARIOS
                 WHERE CODFUN < :DB2-CODFUN
-                FETCH FIRST ROW ONLY
                 ORDER BY CODFUN DESC
+                FETCH FIRST ROW ONLY
             END-EXEC.
             IF WK-INDICATOR-EMAIL = -1
                 MOVE '----------------' TO DB2-EMAILFUN
@@ -479,7 +479,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
           211-LE-PROXIMO.
             MOVE SPACES  TO DB2-NOMEFUN-TEXT.
             MOVE SPACES  TO DB2-EMAILFUN-TEXT.
-            MOVE CODIGO1 TO DB2-CODFUN.
+            MOVE CODIGOI TO DB2-CODFUN.
             EXEC SQL
                 SELECT *
                     INTO :DB2-CODFUN,
@@ -491,8 +491,8 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                          :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
                 FROM EAD569.FUNCIONARIOS
                 WHERE CODFUN > :DB2-CODFUN
-                FETCH FIRST ROW ONLY
                 ORDER BY CODFUN ASC
+                FETCH FIRST ROW ONLY
             END-EXEC.
             IF WK-INDICATOR-EMAIL = -1
                 MOVE '----------------' TO DB2-EMAILFUN
@@ -510,7 +510,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
         212-LE-FUNCIONARIO.
             MOVE SPACES  TO DB2-NOMEFUN-TEXT.
             MOVE SPACES  TO DB2-EMAILFUN-TEXT.
-            MOVE CODIGO1 TO DB2-CODFUN.
+            MOVE CODIGOI TO DB2-CODFUN.
             EXEC SQL
                 SELECT *
                     INTO :DB2-CODFUN,
@@ -542,13 +542,13 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
         213-CARREGA-TELA.
             MOVE DB2-CODFUN TO CODIGOO.
             MOVE DB2-NOMEFUN-TEXT TO NOMEO.
-            MOVE DB2-SALARIOFUN   TO WK-SALARIO-ALFA.
+            MOVE DB2-SALARIOFUN   TO WK-SALARIO-NUM.
             MOVE WK-SALINT-ALFA   TO SALINTO.
             MOVE WK-SALDEC-ALFA   TO SALDECO.
             MOVE DB2-DEPTOFUN     TO DEPTOO.
-            MOVE DB2-ADMISSFUN(9:2) TO ADMDIAO.
-            MOVE DB2-ADMISSFUN(6:2) TO ADMMESO.
-            MOVE DB2-ADMISSFUN(1:4) TO ADMANOO.
+            MOVE DB2-ADMISSFUN(9:2) TO DIAADMO.
+            MOVE DB2-ADMISSFUN(6:2) TO MESADMO.
+            MOVE DB2-ADMISSFUN(1:4) TO ANOADMO.
             MOVE DB2-IDADEFUN       TO IDADEO.
             MOVE DB2-EMAILFUN-TEXT  TO EMAILO.
        **************************************                           
@@ -582,4 +582,87 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
 
 
 
+OBS: ANTES, SEMPRE COMPILÁVAMOS OS PROGRAMAS COM O COMPCICS. NO PROGRAMA ACIMA VAMOS COMPILAR COM O JCL COMPCIDB(CICS COM DB2).
 
+GR.EAD569.JOBLIB(COMPCIDB) - 01.03
+
+//AD569CID JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID
+//*--------------------------------------------------------------------*
+//*      JOB DE COMPILACAO DE PROGRAMA COBOL COM DB2 CICS  (USANDO MENU*
+//*      NAME - NOME DO SEU PROGRAMA
+//*      INSTR - SUA CHAVE
+//*   ATENCAO - PARA PROGRAMAS SEM MENU, USAR SO O PRIMEIRO BIND
+//*   ATENCAO - NO ULTIMO BIND COLOCAR O PROGRAMA MENU
+//*--------------------------------------------------------------------*
+// JCLLIB ORDER=GR.GERAL.PROCLIB
+//COMPCIDB EXEC DFHCIDB2,NAME='AD569PB',INSTR='EAD569'
+//BIND-SYSTSIN  DD *
+DSN SYSTEM(DB8G)
+BIND PLAN(AD569PB) MEM(AD569PB) ACT(REP) ISOLATION(CS)    -
+     LIB('DSN810.DBRMLIB.DATA')
+BIND PACKAGE(EAD569) MEM(AD569PB) ACT(REP) ISOLATION(CS)   -
+     LIB('DSN810.DBRMLIB.DATA') VALIDATE(BIND)
+BIND PLAN(AD569PA) PKLIST(EAD569.*)
+                     VALIDATE(BIND)  ACT(REP) ISOLATION(CS)
+END
+//*
+
+
+Abrir outra conexão no tn3270 e conectar no CICS para cadastrar o mapa, o programa e a transação
+
+1º - Cadastrar o mapa
+ceda def map
+
+CEDA  DEFine Mapset( AD569MB   )
+ mapset         : AD569MB
+ Group          :EAD569
+
+2º - Cadastrar o programa
+
+def prog
+
+CEDA  DEFine PROGram( AD569PB   )
+ PROGram        : AD569PB
+ Group          : EAD569
+Language      ==> Cobol
+
+3º - Cadastrar a transação
+
+def trans
+
+CEDA  DEFine PROGram( ADAB   )
+ TRANSACTION  ==> ADAB
+ Group          : EAD569
+ PROGram        : AD569PB
+ 
+Language      ==> Cobol
+
+4º - Cadastrar o PLAN do MENU
+
+def db2e
+
+CEDA  DEFine DB2Entry( AD569PA   )
+ DB2Entry     ==> AD569PA
+ Group        ==> EAD569
+ TRansid      ==> AADA
+ PLAN         ==> AD569PA
+
+5º - Cadastrar o PLAN da CONSULTA
+
+def db2e
+
+CEDA  DEFine DB2Entry( AD569PB   )
+ DB2Entry     ==> AD569PB
+ Group        ==> EAD569
+ TRansid      ==> AADB
+ PLAN         ==> AD569PB
+
+OBS: Depois de cadastrar vamos instalar
+
+dis gr(EAD569)
+
+OBS: depois de instalar vamos fazer uma cópia nova
+
+cemt set prog(AD569PA) new
+cemt set prog(AD569PB) new
+cemt set prog(AD569MB) new
