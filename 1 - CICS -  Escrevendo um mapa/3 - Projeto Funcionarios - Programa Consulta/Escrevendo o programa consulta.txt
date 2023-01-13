@@ -172,12 +172,15 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
         WORKING-STORAGE SECTION.                                        
             COPY AD569MA.
         01  WK-AREA-COM.
-            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
-        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.              
-        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.                   
-        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                        
+        77  WK-RET-CICS      PIC S9(4)   COMP VALUE ZEROS.
+        77  WK-RET-CICS-EDIT PIC ZZ9     VALUE ZEROS.
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.
         77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
-        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.         
+        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
+        LINKAGE SECTION.
+        01  DFHCOMMAREA.
+            05 LK-CODFUN     PIC X(4).
        *                                                                
         PROCEDURE DIVISION.                                             
         000-PRINCIPAL SECTION.                                          
@@ -194,7 +197,16 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
         100-INICIAR SECTION.                                            
         101-INICIAR.
             MOVE LOW-VALUES TO MAPMENUI.
-            EXEC CICS RECEIVE                                           
+            IF EIBCALEN > 0
+                PERFORM 102-LE-COMMAREA
+            ELSE
+                PERFORM 103-LE-TELA
+            END-IF.
+        102-LE-COMMAREA.
+            MOVE LK-CODFUN TO CODIGOI.
+            MOVE 'N'  TO WK-MAPA-DESENHADO.
+        103-LE-TELA.
+            EXEC CICS RECEIVE
                 MAPSET('AD569MA')                                       
                 MAP('MAPMENU')                                          
                 INTO(MAPMENUI)                                          
@@ -267,21 +279,30 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
                 DATESEP('/')                                            
                 TIME(HORAO)                                             
                 TIMESEP(':')                                            
-            END-EXEC.                                                   
-            IF WK-MAPA-DESENHADO = 'N'                                  
+            END-EXEC.
+            IF EIBCALEN > 0
                 EXEC CICS SEND                                          
                     MAPSET('AD569MA')                                   
-                    MAP('MAPMENU')                                      
-                    MAPONLY                                             
+                    MAP('MAPMENU')
+                    FROM(MAPMENUO)   
                     ERASE                                               
-                END-EXEC                                                
-            ELSE                                                        
-                EXEC CICS SEND                                          
-                    MAPSET('AD569MA')                                   
-                    MAP('MAPMENU')                                      
-                    DATAONLY                                            
-                    FROM(MAPMENUO)                                      
-                END-EXEC                                                
+                END-EXEC 
+            ELSE
+                IF WK-MAPA-DESENHADO = 'N'                                  
+                    EXEC CICS SEND                                          
+                        MAPSET('AD569MA')                                   
+                        MAP('MAPMENU')                                      
+                        MAPONLY                                             
+                        ERASE                                               
+                    END-EXEC                                                
+                ELSE                                                        
+                    EXEC CICS SEND                                          
+                        MAPSET('AD569MA')                                   
+                        MAP('MAPMENU')                                      
+                        DATAONLY                                            
+                        FROM(MAPMENUO)                                      
+                    END-EXEC
+                 END-IF
             END-IF.
 
 
@@ -380,26 +401,12 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                     MOVE 'S'  TO WK-MAPA-DESENHADO                      
                 WHEN DFHRESP(MAPFAIL)
                     MOVE 'FAVOR INICIAR PELO MENU' TO MSGO
-                    EXEC CICS SEND TEXT
-                        FROM(MSGO)
-                        ERASE
-                        FREEKB
-                    END-EXEC
-                    EXEC CICS
-                        RETURN
-                    END-EXEC           
+                    PERFORM 220-RETURN           
                 WHEN OTHER                                              
                     MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
                     MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
                     MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
-                    EXEC CICS SEND TEXT
-                        FROM(MSGO)
-                        ERASE
-                        FREEKB
-                    END-EXEC
-                    EXEC CICS                                           
-                        RETURN                                          
-                    END-EXEC                                            
+                    PERFORM 220-RETURN                                          
             END-EVALUATE.                                               
        **********************************                               
         200-PROCESSAR SECTION.                                          
@@ -412,9 +419,8 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                WHEN DFHPF8
                    PERFORM 211-LE-PROXIMO
                WHEN DFHPF12
-                   EXEC CICS
-                       RETURN
-                   END-EXEC
+                   MOVE LOW-VALUES TO MSGO
+                    PERFORM 220-RETURN
                WHEN OTHER
                    PERFORM 212-LE-FUNCIONARIO
             END-EVALUATE.
@@ -436,14 +442,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                     MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
                     MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
                     MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
-                    EXEC CICS SEND TEXT
-                        FIELD(MSGO)
-                        ERASE
-                        FREEKB
-                    END-EXEC
-                    EXEC CICS                                           
-                        RETURN                                          
-                    END-EXEC                                            
+                    PERFORM 220-RETURN                                       
             END-EVALUATE.
         210-LE-ANTERIOR.
             MOVE SPACES  TO DB2-NOMEFUN-TEXT.
@@ -551,6 +550,17 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             MOVE DB2-ADMISSFUN(1:4) TO ANOADMO.
             MOVE DB2-IDADEFUN       TO IDADEO.
             MOVE DB2-EMAILFUN-TEXT  TO EMAILO.
+            MOVE 'FUNCIONARIO XXXX LIDO COM SUCESSO' TO MSGO.
+            MOVE DB2-CODFUN         TO MSGO(13:4).
+        220-RETURN.
+            EXEC CICS SEND TEXT
+                FIELD(MSGO)
+                ERASE
+                FREEKB
+            END-EXEC
+            EXEC CICS                                           
+                RETURN                                          
+            END-EXEC.
        **************************************                           
         900-FINALIZAR SECTION.                                          
         901-FINALIZAR.                                                  
@@ -666,3 +676,9 @@ OBS: depois de instalar vamos fazer uma cópia nova
 cemt set prog(AD569PA) new
 cemt set prog(AD569PB) new
 cemt set prog(AD569MB) new
+
+Debugando no CICS
+
+cedf
+
+
