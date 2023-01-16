@@ -419,8 +419,8 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
                WHEN DFHPF8
                    PERFORM 211-LE-PROXIMO
                WHEN DFHPF12
-                   MOVE LOW-VALUES TO MSGO
-                    PERFORM 220-RETURN
+                   MOVE 'PRESSIONE <ESC>' TO MSGO
+                   PERFORM 220-RETURN
                WHEN OTHER
                    PERFORM 212-LE-FUNCIONARIO
             END-EVALUATE.

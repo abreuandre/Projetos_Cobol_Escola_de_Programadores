@@ -1,0 +1,203 @@
+GR.EAD569.COBLIB(TELAINCL) - 01.00
+
+copy 'gr.ead569.coblib(telacons)'
+
+                        #CONSULTA FUNCIONARIOS                                 #XXXXXXXXXXXX
+                                                                               #XXXXXXXXXX
+
+              #CODIGO DO FUNCIONARIO#XXXX#
+
+              #NOME         :#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX#
+              #SALARIO      :#999999#,#99#
+              #DEPARTAMENTO :#XXX#
+              #ADMISSAO     :#99#/#99#/#9999#
+              #IDADE        :#99#
+              #EMAIL        :#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX#
+
+#F3-MENU F12-EXIT
+
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
+GR.EAD569.COBLIB(AD569MC) - 01.00
+
+copy 'gr.ead569.coblib(ad569mb)'
+
+AD569MC DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES
+MAPINCL DFHMDI SIZE=(24,80)
+*****************************************************
+        DFHMDF POS=(1,25),                                             *
+               LENGTH=24,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='INCLUSAO DE FUNCIONARIOS'
+*****************************************************
+DATA    DFHMDF POS=(1,70),                                             *
+               LENGTH=10,                                              *
+               ATTRB=ASKIP
+*****************************************************
+HORA    DFHMDF POS=(2,70),                                             *
+               LENGTH=08,                                              *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(4,15),                                             *
+               LENGTH=21,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='CODIGO DO FUNCIONARIO'
+*****************************************************
+CODIGO  DFHMDF POS=(4,37),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,BRT,FSET,IC)
+*****************************************************
+        DFHMDF POS=(4,42),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(6,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='NOME         :'
+*****************************************************
+NOME    DFHMDF POS=(6,30),                                             *
+               LENGTH=30,                                              *
+               ATTRB=(UNPROT,BRT,FSET)
+*****************************************************
+        DFHMDF POS=(6,61),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(7,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='SALARIO      :'
+*****************************************************
+SALINT  DFHMDF POS=(7,30),                                             *
+               LENGTH=06,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET),                            *
+               PICIN='9(6)'
+*****************************************************
+        DFHMDF POS=(7,37),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL=','
+*****************************************************
+SALDEC  DFHMDF POS=(7,39),                                             *
+               LENGTH=02,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET)                             *
+               PICIN='99'
+*****************************************************
+        DFHMDF POS=(7,42),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(8,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='DEPARTAMENTO :'
+*****************************************************
+DEPTO   DFHMDF POS=(8,30),                                             *
+               LENGTH=03,                                              *
+               ATTRB=(UNPROT,BRT,FSET)
+*****************************************************
+        DFHMDF POS=(8,34),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(9,15),                                             *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='ADMISSAO     :'
+*****************************************************
+DIAADM  DFHMDF POS=(9,30),                                             *
+               LENGTH=02,                                              *
+               ATTRB=(UNPROT, NUM, BRT,FSET),                          *
+               PICIN='99'
+*****************************************************
+        DFHMDF POS=(9,33),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='/'
+*****************************************************
+MESADM  DFHMDF POS=(9,35),                                             *
+               LENGTH=02,                                              *
+               ATTRB=(UNPROT, NUM, BRT,FSET),                          *
+               PICIN='99'
+*****************************************************
+        DFHMDF POS=(9,38),                                             *
+               LENGTH=01,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='/'
+*****************************************************
+ANOADM  DFHMDF POS=(9,40),                                             *
+               LENGTH=04,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET),                            *
+               PICIN='9999'
+*****************************************************
+        DFHMDF POS=(9,45),                                             *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(10,15),                                            *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='IDADE        :'
+*****************************************************
+IDADE   DFHMDF POS=(10,30),                                            *
+               LENGTH=02,                                              *
+               ATTRB=(UNPROT,NUM,BRT,FSET),                            *
+               PICIN='99'
+*****************************************************
+        DFHMDF POS=(10,33),                                            *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(11,15),                                            *
+               LENGTH=14,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='EMAIL        :'
+*****************************************************
+EMAIL   DFHMDF POS=(11,30),                                            *
+               LENGTH=30,                                              *
+               ATTRB=(UNPROT,BRT,FSET)
+*****************************************************
+        DFHMDF POS=(11,61),                                            *
+               LENGTH=0,                                               *
+               ATTRB=ASKIP
+*****************************************************
+        DFHMDF POS=(13,01),                                            *
+               LENGTH=17,                                              *
+               ATTRB=ASKIP,                                            *
+               INITIAL='F3-MENU F12-EXIT'
+*****************************************************
+MSG     DFHMDF POS=(15,01),
+        LENGTH=79,
+        ATTRB=ASKIP
+*****************************************************
+        DFHMSD TYPE=FINAL
+        END
+
+
+
+Compilando o Mapa:
+
+GR.EAD569.JOBLIB(COMPMAPA) - 01.09
+
+//AD569MAP JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=EAD569
+//*=================================================================
+//* JCL PARA COMPILAR MAPAS
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE
+//*=================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569MC,INSTR='EAD569'
+
+
+No CICS primeiro vamos cadastrar o Mapa
+
+ceda def map
+
+Mapset      : AD569MC
+Group       : EAD569
+dis gr(ead569)
+digita i no AD569MC para instalar
+
+testar
+ceci send map(ad569mc)
