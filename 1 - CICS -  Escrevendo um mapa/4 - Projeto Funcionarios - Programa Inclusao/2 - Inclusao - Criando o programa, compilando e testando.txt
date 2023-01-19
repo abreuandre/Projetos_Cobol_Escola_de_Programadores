@@ -142,7 +142,7 @@ na linha de comando digitar: copy 'ge.ead569.colib(ad569pb)'
             MOVE SALDECI                 TO WK-SALDEC-ALFA.
             MOVE WK-SALARIO-NUM          TO DB2-SALARIOFUN.
             MOVE DEPTOI                  TO DB2-DEPTOFUN.
-            MOVE ALL '/'                 TO DB2-ADMISSFUN.
+            MOVE ALL '-'                 TO DB2-ADMISSFUN.
             MOVE DIAADMI                 TO DB2-ADMISSFUN(9:2).
             MOVE MESADMI                 TO DB2-ADMISSFUN(6:2).
             MOVE ANOADMI                 TO DB2-ADMISSFUN(1:4).
@@ -169,12 +169,13 @@ na linha de comando digitar: copy 'ge.ead569.colib(ad569pb)'
                 WHEN -530
                     MOVE 'DEPARTAMENTO XXX JA EXISTE' TO MSGO
                     MOVE DB2-DEPTOFUN                TO MSGO(14:3)
+                WHEN -181
+                    MOVE 'DATA INVALIDA' TO MSGO
                 WHEN OTHER
                     MOVE 'ERRO XXX NO INSERT'  TO  MSGO
-                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT
-                    MOVE WK-RET-CICS-EDIT  TO MSGO(6:3)
+                    MOVE SQLCODE      TO WK-SQLCODE-EDIT
+                    MOVE WK-SQLCODE-EDIT   TO MSGO(6:4)
             END-EVALUATE.        
-            MOVE CODIGOI TO DB2-CODFUN.
         220-RETURN.
             EXEC CICS SEND TEXT
                 FIELD(MSGO)
