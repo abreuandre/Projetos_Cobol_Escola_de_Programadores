@@ -238,7 +238,8 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
                     MOVE 'AD569PB'  TO WK-PROGRAMA
                     PERFORM 202-CALL
                 WHEN 495                                                
-                    MOVE 'INCLUSAO NAO PROGRAMADA' TO MSGO              
+                    MOVE 'AD569PC'  TO WK-PROGRAMA
+                    PERFORM 202-CALL              
                 WHEN 575                                                 
                     MOVE 'EXCLUSAO NAO PROGRAMADA' TO MSGO              
                 WHEN 655                                                
@@ -358,9 +359,11 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
             03 WK-SALINT-ALFA  PIC 9(6).
             03 WK-SALDEC-ALFA  PIC 9(2).
         77  WK-SQLCODE-EDIT    PIC -999        VALUE ZEROS.
-        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.                                               
+        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.
+        01  WK-AREA-COM.
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
         77  WK-RET-CICS      PIC S9(4)   COMP  VALUE ZEROS.              
-        77  WK-RET-CICS-EDIT PIC ZZ9           VALUE ZEROS.                   
+        77  WK-RET-CICS-EDIT PIC ZZ9           VALUE ZEROS. 
         77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
         77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
         77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
@@ -381,7 +384,7 @@ GR.EAD569.COBLIB(AD569PB) - 01.00
        **************************************                           
         100-INICIAR SECTION.                                            
         101-INICIAR.
-            MOVE LOW-VALUES TO MAPMENUI.
+            MOVE LOW-VALUES TO MAPCONSI.
             IF EIBCALEN > 0
                 PERFORM 102-LE-COMMAREA
             ELSE

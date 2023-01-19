@@ -1,0 +1,274 @@
+GR.ALUNO.COBLIB(AD569PC) - 01.00
+
+na linha de comando digitar: copy 'ge.ead569.colib(ad569pb)'
+
+
+        IDENTIFICATION DIVISION.                                        
+        PROGRAM-ID.                                                     
+            AD569PC.                                                    
+        AUTHOR.                                                         
+            ANDRE.                                                      
+       ******************************************                       
+       *     INCLUSAO DE FUNCIONARIOS (CICS)    *                       
+       ******************************************                       
+       *                                                                
+        ENVIRONMENT DIVISION.                                           
+        CONFIGURATION SECTION.                                          
+        SPECIAL-NAMES.                                                  
+            DECIMAL-POINT IS COMMA.                                     
+        INPUT-OUTPUT SECTION.                                           
+        FILE-CONTROL.                                                   
+       * 
+        DATA DIVISION.                                                  
+        FILE SECTION.                                                   
+        WORKING-STORAGE SECTION.                                        
+            COPY AD569MC.
+            COPY DFHAID.
+            EXEC SQL
+                INCLUDE BOOKFUNC
+            END-EXEC.
+            EXEC SQL
+                INCLUDE SQLCA
+            END EXEC.
+        01  WK-SALARIO-NUM     PIC 9(6)V99     VALUE ZEROS.
+        01  WK-SALARIO-ALFA    REDEFINES WK-SALARIO-NUM.
+            03 WK-SALINT-ALFA  PIC 9(6).
+            03 WK-SALDEC-ALFA  PIC 9(2).
+        77  WK-SQLCODE-EDIT    PIC -999        VALUE ZEROS.
+        01  WK-AREA-COM.
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                             
+        77  WK-RET-CICS      PIC S9(4)   COMP  VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9           VALUE ZEROS.                   
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+        77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
+        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
+        77  WK-POSICAO         PIC 99          VALUE SPACES.
+        LINKAGE SECTION.
+        01  DFHCOMMAREA.
+            05 LK-CODFUN     PIC X(4).
+       *
+        PROCEDURE DIVISION.                                             
+        000-PRINCIPAL SECTION.                                          
+        001-PRINCIPAL.                                                  
+            PERFORM 101-INICIAR.
+            IF WK-MAPA-DESENHADO = 'S'                                       
+                PERFORM 201-PROCESSAR
+            END-IF.                                   
+            PERFORM 901-FINALIZAR.   
+            EXEC CICS                                                   
+                RETURN
+                TRANSID('AADC')
+            END-EXEC.                                                   
+       **************************************                           
+        100-INICIAR SECTION.                                            
+        101-INICIAR.
+            MOVE LOW-VALUES TO MAPINCLI.
+            IF EIBCALEN > 0
+                PERFORM 102-LE-COMMAREA
+            ELSE
+                PERFORM 103-LE-TELA
+            END-IF.
+        102-LE-COMMAREA.
+            MOVE LK-CODFUN TO CODIGOI.
+            MOVE 'N' TO WK-MAPA-DESENHADO.
+        103-LE-TELA.
+            EXEC CICS RECEIVE
+                MAPSET('AD569MC')
+                MAP('MAPINCL')                                          
+                INTO(MAPINCLI)                                          
+                RESP(WK-RET-CICS)                                       
+            END-EXEC.                                                   
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    MOVE 'S'  TO WK-MAPA-DESENHADO                      
+                WHEN DFHRESP(MAPFAIL)
+                    MOVE 'FAVOR INICIAR PELO MENU' TO MSGO
+                    PERFORM 220-RETURN           
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    PERFORM 220-RETURN                                          
+            END-EVALUATE.                                               
+       **********************************                               
+        200-PROCESSAR SECTION.                                          
+        201-PROCESSAR.
+            EVALUATE EIBAID
+               WHEN DFHPF3
+                   PERFORM 202-CALL
+               WHEN DFHPF12
+                   MOVE 'PRESSIONE <ESC>' TO MSGO
+                   PERFORM 220-RETURN
+               WHEN OTHER
+                   PERFORM 212-INCLUI-FUNCIONARIO
+            END-EVALUATE.
+        202-CALL.
+            MOVE CODIGOI TO WK-CODFUN-COM.
+            MOVE 'AD569PA'  TO WK-PROGRAMA.
+            EXEC CICS XCTL
+                PROGRAM(WK-PROGRAMA)
+                COMMAREA(WK-AREA-COM)
+                RESP(WK-RET-CICS)
+            END-EXEC.
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    CONTINUE                      
+                WHEN DFHRESP(PGMIDERR)                                   
+                    MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
+                    MOVE WK-PROGRAMA TO MSGO(10:8)
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    PERFORM 220-RETURN                                       
+            END-EVALUATE.
+        205-CONTA-NOME.
+            MOVE 30     TO DB2-NOMEFUN-LEN.
+            PERFORM VARYING WK-POSICAO FROM 30 BY -1
+                   UNTIL DB2-NOMEFUN-TEXT(WK-POSICAO:1) NOT = SPACES
+                SUBTRACT 1 FROM DB2-NOMEFUN-LEN
+            END-PERFORM.
+        206-CONTA-EMAIL.
+            MOVE 30     TO DB2-EMAILFUN-LEN.
+            PERFORM VARYING WK-POSICAO FROM 30 BY -1
+                   UNTIL DB2-EMAILFUN-TEXT(WK-POSICAO:1) NOT = SPACES
+                SUBTRACT 1 FROM DB2-EMAILFUN-LEN
+            END-PERFORM.
+        212-INCLUI-FUNCIONARIO.
+            MOVE WK-CODIGOI              TO DB2-CODFUN.
+            MOVE WK-NOMEI                TO DB2-NOMEFUN-TEXT.
+            PERFORM 205-CONTA-NOME.
+            MOVE SALINTI                 TO WK-SALINT-ALFA.
+            MOVE SALDECI                 TO WK-SALDEC-ALFA.
+            MOVE WK-SALARIO-NUM          TO DB2-SALARIOFUN.
+            MOVE DEPTOI                  TO DB2-DEPTOFUN.
+            MOVE ALL '/'                 TO DB2-ADMISSFUN.
+            MOVE DIAADMI                 TO DB2-ADMISSFUN(9:2).
+            MOVE MESADMI                 TO DB2-ADMISSFUN(6:2).
+            MOVE ANOADMI                 TO DB2-ADMISSFUN(1:4).
+            MOVE IDADEI                  TO DB2-IDADEFUN.
+            MOVE EMAILI                  TO DB2-EMAILFUN-TEXT.
+            PERFORM 206-CONTA-EMAIL.
+            EXEC SQL
+                INSERT INTO EAD569.FUNCIONARIOS
+                VALUES(:DB2-CODFUN,
+                       :DB2-NOMEFUN,
+                       :DB2-SALARIOFUN,
+                       :DB2-DEPTOFUN,
+                       :DB2-ADMISSFUN,
+                       :DB2-IDADEFUN,
+                       :DB2-EMAILFUN)
+            END-EXEC.
+            EVALUATE SQLCODE
+                WHEN 0
+                    MOVE 'FUNCIONARIO XXXX INCLUIDO' TO MSGO
+                    MOVE DB2-CODFUN                 TO MSGO(13:4)
+                WHEN -803
+                    MOVE 'FUNCIONARIO XXXX JA EXISTE' TO MSGO
+                    MOVE DB2-CODFUN                 TO MSGO(13:4)
+                WHEN -530
+                    MOVE 'DEPARTAMENTO XXX JA EXISTE' TO MSGO
+                    MOVE DB2-DEPTOFUN                TO MSGO(14:3)
+                WHEN OTHER
+                    MOVE 'ERRO XXX NO INSERT'  TO  MSGO
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT
+                    MOVE WK-RET-CICS-EDIT  TO MSGO(6:3)
+            END-EVALUATE.        
+            MOVE CODIGOI TO DB2-CODFUN.
+        220-RETURN.
+            EXEC CICS SEND TEXT
+                FIELD(MSGO)
+                ERASE
+                FREEKB
+            END-EXEC
+            EXEC CICS                                           
+                RETURN                                          
+            END-EXEC.
+       **************************************                           
+        900-FINALIZAR SECTION.                                          
+        901-FINALIZAR.                                                  
+            EXEC CICS ASKTIME                                           
+                ABSTIME(WK-DATA)                                        
+            END-EXEC.                                                   
+            EXEC CICS FORMATTIME                                        
+                ABSTIME(WK-DATA)                                        
+                DDMMYYYY(DATAO)                                         
+                DATESEP('/')                                            
+                TIME(HORAO)                                             
+                TIMESEP(':')                                            
+            END-EXEC.                                                   
+            IF WK-MAPA-DESENHADO = 'N'                                  
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MC')                                   
+                    MAP('MAPINCL')
+                    ERASE
+                    FROM(MAPINCLO)
+                END-EXEC
+            ELSE                                                        
+                EXEC CICS SEND
+                    MAPSET('AD569MC')
+                    MAP('MAPINCL')
+                    DATAONLY
+                    FROM(MAPINCLO)
+                END-EXEC
+            END-IF.
+
+===========================================================================
+
+Compilando o programa
+
+GR.EAD569.JOBLIB(COMPCIDB) - 01.03
+
+//AD569CID JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID
+//*--------------------------------------------------------------------*
+//*      JOB DE COMPILACAO DE PROGRAMA COBOL COM DB2 CICS  (USANDO MENU*
+//*      NAME - NOME DO SEU PROGRAMA
+//*      INSTR - SUA CHAVE
+//*   ATENCAO - PARA PROGRAMAS SEM MENU, USAR SO O PRIMEIRO BIND
+//*   ATENCAO - NO ULTIMO BIND COLOCAR O PROGRAMA MENU
+//*--------------------------------------------------------------------*
+// JCLLIB ORDER=GR.GERAL.PROCLIB
+//COMPCIDB EXEC DFHCIDB2,NAME='AD569PC',INSTR='EAD569'
+//BIND-SYSTSIN  DD *
+DSN SYSTEM(DB8G)
+BIND PLAN(AD569PC) MEM(AD569PC) ACT(REP) ISOLATION(CS)    -
+     LIB('DSN810.DBRMLIB.DATA')
+BIND PACKAGE(EAD569) MEM(AD569PC) ACT(REP) ISOLATION(CS)   -
+     LIB('DSN810.DBRMLIB.DATA') VALIDATE(BIND)
+BIND PLAN(AD569PA) PKLIST(EAD569.*)
+                     VALIDATE(BIND)  ACT(REP) ISOLATION(CS)
+END
+//*
+
+==========================================================================
+
+Testando o programa no CICS
+
+Comandos:
+l cics
+
+cadastrar
+ceda def prog
+Program      : AD569PC
+Group        : EAD569
+Language   ==> Cobol
+
+def trans
+Transaction  : AADC
+Program      : AD569PC
+
+def db2e
+DB2Entry   ==> AD569PC
+Transid    ==> AADC
+PLAN       ==> AD569PC
+
+dis gr(ead569)
+inserir a letra "i"(instalar) ao lado de:
+*AD569PC PROGRAM
+*AADC    TRANSACTION
+*AD569PC DB2ENTRY
+
+
+No cics fazer a cópia:
+cemt set prog(ad569pa) new
+SET PROG(AD569PC) NEW
