@@ -1,0 +1,422 @@
+PROGRAMA
+
+GR.EAD569.COBLIB(AD569PE) - 01.00
+
+copy 'gr.ead569.coblib(ad569pd)'
+
+
+        IDENTIFICATION DIVISION.                                        
+        PROGRAM-ID.                                                     
+            AD569PE.                                                    
+        AUTHOR.                                                         
+            ANDRE.                                                      
+       ******************************************                       
+       *     ALTERACAO DE FUNCIONARIOS (CICS)   *                       
+       ******************************************                       
+       *                                                                
+        ENVIRONMENT DIVISION.                                           
+        CONFIGURATION SECTION.                                          
+        SPECIAL-NAMES.                                                  
+            DECIMAL-POINT IS COMMA.                                     
+        INPUT-OUTPUT SECTION.                                           
+        FILE-CONTROL.                                                   
+       * 
+        DATA DIVISION.                                                  
+        FILE SECTION.                                                   
+        WORKING-STORAGE SECTION.                                        
+            COPY AD569ME.
+            COPY DFHAID.
+            COPY ATRIBS.
+            EXEC SQL
+                INCLUDE BOOKFUNC
+            END-EXEC.
+            EXEC SQL
+                INCLUDE SQLCA
+            END EXEC.
+        01  WK-SALARIO-NUM     PIC 9(6)V99     VALUE ZEROS.
+        01  WK-SALARIO-ALFA    REDEFINES WK-SALARIO-NUM.
+            03 WK-SALINT-ALFA  PIC 9(6).
+            03 WK-SALDEC-ALFA  PIC 9(2).
+        77  WK-SQLCODE-EDIT    PIC -999        VALUE ZEROS.
+        77  WK-INDICATOR-EMAIL PIC S9(4) COMP  VALUE ZEROS.
+        01  WK-AREA-COM.
+            05 WK-CODFUN-COM   PIC X(4) VALUE SPACES.                                               
+        77  WK-RET-CICS      PIC S9(4)   COMP  VALUE ZEROS.              
+        77  WK-RET-CICS-EDIT PIC ZZ9           VALUE ZEROS. 
+        77  WK-MAPA-DESENHADO PIC X           VALUE 'N'.                
+        77  WK-DATA          PIC S9(15)  COMP-3 VALUE ZEROS.
+        77  WK-PROGRAMA      PIC X(8)    VALUE SPACES.
+        LINKAGE SECTION.
+        01  DFHCOMMAREA.
+            05 LK-CODFUN     PIC X(4).
+       *
+        PROCEDURE DIVISION.                                             
+        000-PRINCIPAL SECTION.                                          
+        001-PRINCIPAL.                                                  
+            PERFORM 101-INICIAR.                                        
+            PERFORM 201-PROCESSAR.                                   
+            PERFORM 901-FINALIZAR.   
+            EXEC CICS                                                   
+                RETURN
+                TRANSID('AADE')
+            END-EXEC.                                                   
+       **************************************                           
+        100-INICIAR SECTION.                                            
+        101-INICIAR.
+            MOVE LOW-VALUES TO MAPALTI.
+            IF EIBCALEN > 0
+                PERFORM 102-LE-COMMAREA
+            ELSE
+                PERFORM 103-LE-TELA
+            END-IF.
+        102-LE-COMMAREA.
+            MOVE LK-CODFUN TO CODIGOI.
+            MOVE 'N'  TO WK-MAPA-DESENHADO.
+            MOVE '1'  TO FASEI.
+        103-LE-TELA.
+            EXEC CICS RECEIVE                                           
+                MAPSET('AD569ME')                                  
+                MAP('MAPALT')                                          
+                INTO(MAPALTI)                                          
+                RESP(WK-RET-CICS)                                       
+            END-EXEC.                                                   
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    MOVE 'S'  TO WK-MAPA-DESENHADO                      
+                WHEN DFHRESP(MAPFAIL)
+                    MOVE 'FAVOR INICIAR PELO MENU' TO MSGO
+                    PERFORM 220-RETURN           
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    PERFORM 220-RETURN                                          
+            END-EVALUATE.                                               
+       **********************************                               
+        200-PROCESSAR SECTION.                                          
+        201-PROCESSAR.
+            EVALUATE EIBAID
+               WHEN DFHPF3
+                   PERFORM 202-CALL
+               WHEN DFHPF12
+                   MOVE 'PRESSIONE <ESC>' TO MSGO
+                   PERFORM 220-RETURN
+               WHEN OTHER
+                   IF FASEI = '1'
+                       PERFORM 212-LE-FUNCIONARIO
+                   ELSE
+                       PERFORM 214-ALTERA-FUNCIONARIO
+                       PERFORM 215-PREPARA-FASE1
+                   END-IF
+            END-EVALUATE.
+        202-CALL.
+            MOVE CODIGOI TO WK-CODFUN-COM.
+            MOVE 'AD569PA'  TO WK-PROGRAMA.
+            EXEC CICS XCTL
+                PROGRAM(WK-PROGRAMA)
+                COMMAREA(WK-AREA-COM)
+                RESP(WK-RET-CICS)
+            END-EXEC.
+            EVALUATE WK-RET-CICS                                        
+                WHEN DFHRESP(NORMAL)                                    
+                    CONTINUE                      
+                WHEN DFHRESP(PGMIDERR)                                   
+                    MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
+                    MOVE WK-PROGRAMA TO MSGO(10:8)
+                WHEN OTHER                                              
+                    MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
+                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT               
+                    MOVE WK-RET-CICS-EDIT TO MSGO(6:3)
+                    PERFORM 220-RETURN                                       
+            END-EVALUATE.
+        212-LE-FUNCIONARIO.
+            MOVE SPACES  TO DB2-NOMEFUN-TEXT.
+            MOVE SPACES  TO DB2-EMAILFUN-TEXT.
+            MOVE CODIGOI TO DB2-CODFUN.
+            EXEC SQL
+                SELECT *
+                    INTO :DB2-CODFUN,
+                         :DB2-NOMEFUN,
+                         :DB2-SALARIOFUN,
+                         :DB2-DEPTOFUN,
+                         :DB2-ADMISSFUN,
+                         :DB2-IDADEFUN,
+                         :DB2-EMAILFUN INDICATOR :WK-INDICATOR-EMAIL
+                FROM EAD569.FUNCIONARIOS
+                WHERE CODFUN = :DB2-CODFUN
+                FETCH FIRST ROW ONLY
+                ORDER BY CODFUN ASC
+            END-EXEC.
+            IF WK-INDICATOR-EMAIL = -1
+                MOVE '----------------' TO DB2-EMAILFUN
+            END-IF.
+            EVALUATE SQL CODE
+                WHEN 0
+                    PERFORM 213-CARREGA-TELA
+                    PERFORM 216-PREPARA-FASE2
+                WHEN 100
+                    MOVE 'FUNCIONARIO XXXX NAO EXISTE' TO MSGO
+                    MOVE DB2-CODFUN  TO MSGO(13:4)
+                    PERFORM 216-PREPARA-FASE1
+                WHEN OTHER
+                    MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                    MOVE 'ERRO XXXX NO COMANDO SELECT'  TO MSGO
+                    MOVE WK-SQLCODE-EDIT TO MSGO(6:4)
+                    PERFORM 215-PREPARA-FASE1
+            END-EVALUATE.
+        213-CARREGA-TELA.
+            MOVE DB2-CODFUN TO CODIGOO.
+            MOVE DB2-NOMEFUN-TEXT TO NOMEO.
+            MOVE DB2-SALARIOFUN   TO WK-SALARIO-NUM.
+            MOVE WK-SALINT-ALFA   TO SALINTO.
+            MOVE WK-SALDEC-ALFA   TO SALDECO.
+            MOVE DB2-DEPTOFUN     TO DEPTOO.
+            MOVE DB2-ADMISSFUN(9:2) TO DIAADMO.
+            MOVE DB2-ADMISSFUN(6:2) TO MESADMO.
+            MOVE DB2-ADMISSFUN(1:4) TO ANOADMO.
+            MOVE DB2-IDADEFUN       TO IDADEO.
+            MOVE DB2-EMAILFUN-TEXT  TO EMAILO.
+            MOVE 'PREENCHA CONFIRME' TO MSGO.
+        214-ALTERA-FUNCIONARIO.
+            MOVE WK-CODFUN-ACCEPT   TO DB2-CODFUN.
+            IF   WK-NOMEFUN-ACCEPT  NOT = SPACES
+                 PERFORM 260-ALTERA-NOME
+            END-IF.
+            IF   WK-SALARIOFUN-ACCEPT  IS NUMERIC
+                 PERFORM 261-ALTERA-SALARIO
+            END-IF.
+            IF   WK-DEPTOFUN-ACCEPT    NOT = SPACES
+                 PERFORM 262-ALTERA-DEPARTAMENTO
+            END-IF.
+            IF   WK-ADMISSFUN-ACCEPT   NOT = SPACES
+                 PERFORM 263-ALTERA-ADMISSAO
+            END-IF.
+            IF   WK-IDADEFUN-ACCEPT    IS NUMERIC
+                 PERFORM 264-ALTERA-IDADE
+            END-IF.
+            IF   WK-EMAILFUN-ACCEPT    NOT = SPACES
+                 PERFORM 265-ALTERA-EMAIL
+            END-IF.
+        215-PREPARA-FASE1.
+            MOVE '1'       TO FASEO.
+            MOVE ASKNORMFSET    TO CODIGOA.
+            MOVE UNPROTBRT      TO NOMEA DEPTOA EMAILA.
+            MOVE UNPROTNUMBRT   TO SALINTA SALDECA DIAADMA MESADMA
+                                   ANOADMA IDADEA.
+        216-PREPARA-FASE2.
+            MOVE '2'       TO FASEO.
+            MOVE UNPROTBRTFSET  TO CODIGOA.
+            MOVE ASKIPNORM      TO NOMEA DEPTOA EMAILA.
+            MOVE ASKIPNORM      TO SALINTA SALDECA DIAADMA MESADMA
+                                   ANOADMA IDADEA.
+        220-RETURN.
+            EXEC CICS SEND TEXT
+                FIELD(MSGO)
+                ERASE
+                FREEKB
+            END-EXEC
+            EXEC CICS                                           
+                RETURN                                          
+            END-EXEC.
+        255-CONTA-NOME.
+            MOVE 30     TO DB2-NOMEFUN-LEN.
+            PERFORM VARYING WK-POSICAO FROM 30 BY -1
+                   UNTIL DB2-NOMEFUN-TEXT(WK-POSICAO:1) NOT = SPACES
+                SUBTRACT 1 FROM DB2-NOMEFUN-LEN
+             END-PERFORM.
+        256-CONTA-EMAIL.
+            MOVE 30     TO DB2-EMAILFUN-LEN.
+            PERFORM VARYING WK-POSICAO FROM 30 BY -1
+                   UNTIL DB2-EMAILFUN-TEXT(WK-POSICAO:1) NOT = SPACES
+                SUBTRACT 1 FROM DB2-EMAILFUN-LEN
+             END-PERFORM.
+        260-ALTERA-NOME.
+            MOVE WK.NOMEFUN-ACCEPT       TO DB2-NOMEFUN-TEXT.
+            PERFORM 255-CONTA-NOME.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET NOMEFUN = :DB2-NOMEFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     DISPLAY 'NOME DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADO PARA ' DB2-NOMEFUN-TEXT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DO SALARIO'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+        261-ALTERA-SALARIO.
+            MOVE WK-SALARIOFUN-ACCEPT   TO DB2-SALARIOFUN.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET SALARIOFUN = :DB2-SALARIOFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     MOVE WK-SALARIOFUN-ACCEPT TO WK-SALARIO-EDIT
+                     DISPLAY 'SALARIO DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADO PARA ' WK-SALARIO-EDIT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DO SALARIO'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+        262-ALTERA-DEPARTAMENTO.
+            MOVE WK-DEPTOFUN-ACCEPT   TO DB2-DEPTOFUN.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET DEPTOFUN = :DB2-DEPTOFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     DISPLAY 'DEPARTAMENTO DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADO PARA ' WK-SALARIO-EDIT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN -530
+                     DISPLAY 'DEPARTAMENTO ' WK-DEPTOFUN-ACCEPT
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DO DEPARTAMENTO'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+        263-ALTERA-ADMISSAO.
+            MOVE WK-ADMISSFUN-ACCEPT   TO DB2-ADMISSFUN.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET ADMISSFUN = :DB2-ADMISSFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     DISPLAY 'ADMISSAO DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADA PARA ' WK-ADMISSFUN-ACCEPT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DA ADMISSAO'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+        264-ALTERA-IDADE.
+            MOVE WK-IDADEFUN-ACCEPT   TO DB2-IDADEFUN.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET IDADEFUN = :DB2-IDADEFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     DISPLAY 'IDADE DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADA PARA ' WK-IDADEFUN-ACCEPT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DA IDADE'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+        265-ALTERA-EMAIL.
+            MOVE WK-EMAILFUN-ACCEPT   TO DB2-EMAILFUN-TEXT.
+            PERFORM 256-CONTA-EMAIL.
+            EXEC SQL
+                UPDATE EAD569.FUNCIONARIOS
+                    SET EMAILFUN = :DB2-EMAILFUN
+                    WHERE CODFUN = :DB2-CODFUN
+             END-EXEC.
+             EVALUATE SQLCODE
+                 WHEN 0
+                     DISPLAY 'EMAIL DO FUNCIONARIO ' DB2-CODFUN
+                             ' FOI ALTERADO PARA ' WK-EMAILFUN-ACCEPT
+                 WHEN 100
+                     DISPLAY 'FUNCIONARIO ' DB2-CODFUN
+                             ' NAO EXISTE'
+                 WHEN OTHER
+                     MOVE SQLCODE  TO WK-SQLCODE-EDIT
+                     DISPLAY 'ERRO ' WK-SQLCODE-EDIT
+                             ' NO COMANDO UPDATE DA IDADE'
+                     MOVE 12 TO RETURN-CODE
+                     STOP RUN
+             END-EVALUATE.
+       **************************************                           
+        900-FINALIZAR SECTION.                                          
+        901-FINALIZAR.                                                  
+            EXEC CICS ASKTIME                                           
+                ABSTIME(WK-DATA)                                        
+            END-EXEC.                                                   
+            EXEC CICS FORMATTIME                                        
+                ABSTIME(WK-DATA)                                        
+                DDMMYYYY(DATAO)                                         
+                DATESEP('/')                                            
+                TIME(HORAO)                                             
+                TIMESEP(':')                                            
+            END-EXEC.                                                   
+            IF EIBCALEN > 0                                  
+                EXEC CICS SEND                                          
+                    MAPSET('AD569ME')                                   
+                    MAP('MAPALT')
+                    ERASE
+                    FROM(MAPCONSO)
+                END-EXEC
+            ELSE                                                        
+                EXEC CICS SEND                                          
+                    MAPSET('AD569MB')                                   
+                    MAP('MAPCONS')                                      
+                    DATAONLY                                            
+                    FROM(MAPCONSO)                                      
+                END-EXEC                                                
+            END-IF.
+
+
+===========================================================================
+
+Compilando o programa
+
+GR.EAD569.JOBLIB(COMPCIDB) - 01.05
+
+//AD569CID JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID
+//*--------------------------------------------------------------------*
+//*      JOB DE COMPILACAO DE PROGRAMA COBOL COM DB2 CICS  (USANDO MENU*
+//*      NAME - NOME DO SEU PROGRAMA
+//*      INSTR - SUA CHAVE
+//*   ATENCAO - PARA PROGRAMAS SEM MENU, USAR SO O PRIMEIRO BIND
+//*   ATENCAO - NO ULTIMO BIND COLOCAR O PROGRAMA MENU
+//*--------------------------------------------------------------------*
+// JCLLIB ORDER=GR.GERAL.PROCLIB
+//COMPCIDB EXEC DFHCIDB2,NAME='AD569PD',INSTR='EAD569'
+//BIND-SYSTSIN  DD *
+DSN SYSTEM(DB8G)
+BIND PLAN(AD569PC) MEM(AD569PD) ACT(REP) ISOLATION(CS)    -
+     LIB('DSN810.DBRMLIB.DATA')
+BIND PACKAGE(EAD569) MEM(AD569PC) ACT(REP) ISOLATION(CS)   -
+     LIB('DSN810.DBRMLIB.DATA') VALIDATE(BIND)
+BIND PLAN(AD569PA) PKLIST(EAD569.*)
+                     VALIDATE(BIND)  ACT(REP) ISOLATION(CS)
+END
+//*
+
+==========================================================================
