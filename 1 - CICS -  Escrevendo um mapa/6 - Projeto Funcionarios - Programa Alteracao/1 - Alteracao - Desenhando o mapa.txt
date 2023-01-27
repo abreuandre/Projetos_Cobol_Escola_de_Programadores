@@ -81,7 +81,8 @@ NOME    DFHMDF POS=(6,30),                                             *
 SALINT  DFHMDF POS=(7,30),                                             *
                LENGTH=06,                                              *
                ATTRB=(UNPROT,NUM,BRT,FSET),                            *
-               PICIN='9(6)'
+               PICIN='9(6)',                                           *
+               PICOUT='ZZZZZ9'
 *****************************************************
         DFHMDF POS=(7,37),                                             *
                LENGTH=01,                                              *
@@ -91,7 +92,8 @@ SALINT  DFHMDF POS=(7,30),                                             *
 SALDEC  DFHMDF POS=(7,39),                                             *
                LENGTH=02,                                              *
                ATTRB=(UNPROT,NUM,BRT,FSET)                             *
-               PICIN='99'
+               PICIN='99',                                             *
+               PICOUT='99'
 *****************************************************
         DFHMDF POS=(7,42),                                             *
                LENGTH=0,                                               *
@@ -118,7 +120,8 @@ DEPTO   DFHMDF POS=(8,30),                                             *
 DIAADM  DFHMDF POS=(9,30),                                             *
                LENGTH=02,                                              *
                ATTRB=(UNPROT, NUM, BRT,FSET),                          *
-               PICIN='99'
+               PICIN='99',                                             *
+               PICOUT='99'
 *****************************************************
         DFHMDF POS=(9,33),                                             *
                LENGTH=01,                                              *
@@ -128,7 +131,8 @@ DIAADM  DFHMDF POS=(9,30),                                             *
 MESADM  DFHMDF POS=(9,35),                                             *
                LENGTH=02,                                              *
                ATTRB=(UNPROT, NUM, BRT,FSET),                          *
-               PICIN='99'
+               PICIN='99',                                             *
+               PICOUT='99'
 *****************************************************
         DFHMDF POS=(9,38),                                             *
                LENGTH=01,                                              *
@@ -138,7 +142,8 @@ MESADM  DFHMDF POS=(9,35),                                             *
 ANOADM  DFHMDF POS=(9,40),                                             *
                LENGTH=04,                                              *
                ATTRB=(UNPROT,NUM,BRT,FSET),                            *
-               PICIN='9999'
+               PICIN='9999',                                           *
+               PICOUT='9999'
 *****************************************************
         DFHMDF POS=(9,45),                                             *
                LENGTH=0,                                               *
@@ -152,7 +157,8 @@ ANOADM  DFHMDF POS=(9,40),                                             *
 IDADE   DFHMDF POS=(10,30),                                            *
                LENGTH=02,                                              *
                ATTRB=(UNPROT,NUM,BRT,FSET),                            *
-               PICIN='99'
+               PICIN='99',                                             *
+               PICOUT='Z9'
 *****************************************************
         DFHMDF POS=(10,33),                                            *
                LENGTH=0,                                               *

@@ -207,13 +207,13 @@ copy 'gr.ead569.coblib(ad569pd)'
             IF MSGO = SPACES
                 MOVE 'DIGITE NOVO CODIGO PARA ALTERAR' TO MSGO.
         215-PREPARA-FASE1.
-            MOVE '2'       TO FASEO.
+            MOVE '1'       TO FASEO.
             MOVE UNPROTBRTFSET  TO CODIGOA.
             MOVE ASKNORM      TO NOMEA DEPTOA EMAILA.
             MOVE ASKNORM      TO SALINTA SALDECA DIAADMA MESADMA
                                    ANOADMA IDADEA.
         216-PREPARA-FASE2.
-            MOVE '1'       TO FASEO.
+            MOVE '2'       TO FASEO.
             MOVE ASKNORMFSET    TO CODIGOA.
             MOVE UNPROTBRT      TO NOMEA DEPTOA EMAILA.
             MOVE UNPROTNUMBRT   TO SALINTA SALDECA DIAADMA MESADMA
