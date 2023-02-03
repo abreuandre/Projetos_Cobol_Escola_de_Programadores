@@ -12,7 +12,9 @@ AADE  AD569ME AD569PE     ALTERACAO
 
 --------------------------------------------------------------------------------------
 
-#A69A#                  #MENU DE FUNCIONARIOS                        #XXXXXXXXXX
+GR.EAD569.COBLIB(TELAMENU) - 01.00
+
+#AADA#                  #MENU DE FUNCIONARIOS                        #XXXXXXXXXX
                                                                      #XXXXXXXX
                                                                         
               #CODIGO DO FUNCIONARIO#XXXX#O                             
@@ -33,7 +35,7 @@ MAPMENU DFHMDI SIZE=(24,80)
 CODTRAN DFHMDF POS=(1,1),                                              *
                LENGTH=4,                                               *
                ATTRB=(UNPROT,BRT,FSET),                                *
-               INITIAL='EADA'                                           
+               INITIAL='AADA'                                           
 ********************************************************                
         DFHMDF POS=(1,6),                                              *
                LENGTH=0,                                               *
@@ -59,7 +61,7 @@ HORA    DFHMDF POS=(2,70),                                             *
 **********************************************************              
 CODIGO  DFHMDF POS=(4,37),                                             *
                LENGTH=04,                                              *
-               ATTRB=(UNPROT,NUM,BRT,FSET,IC)                           
+               ATTRB=(UNPROT,BRT,FSET,IC)                           
 **********************************************************              
         DFHMDF POS=(4,42),                                             *
                LENGTH=0,                                               *
