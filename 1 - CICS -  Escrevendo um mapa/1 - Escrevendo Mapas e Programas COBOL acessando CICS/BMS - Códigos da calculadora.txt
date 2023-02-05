@@ -3,7 +3,7 @@ Esse Código foi construído para fazer uma calculadora simples com 2 números, 
 
 No QMF vamos fazer um rascunho da calculadora(MEMBER: GR.EAD569.COBLIB.TELACALC):
 
-#A691#                       #CALCULADORA                            #XXXXXXXXXX
+#AAD1#                       #CALCULADORA                            #XXXXXXXXXX
                                                                      #XXXXXXXX
                                                                         
               #N1     #OP  #N2     #RESULTADO                           
@@ -20,7 +20,7 @@ MAPCALC DFHMDI SIZE=(24,80)
 CODTRAN DFHMDF POS=(1,1),                                              *
                LENGTH=4,                                               *
                ATTRB=(UNPROT,BRT,FSET),                                *                               
-               INITIAL='AAL1'                                           
+               INITIAL='AAD1'                                           
 ********************************************************                
         DFHMDF POS=(1,6),                                              *
                LENGTH=0,                                               *
