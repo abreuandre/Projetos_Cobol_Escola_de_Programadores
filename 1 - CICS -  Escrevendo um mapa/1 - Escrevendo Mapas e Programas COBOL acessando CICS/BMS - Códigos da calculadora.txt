@@ -96,3 +96,53 @@ MSG     DFHMDF POS=(7,01),                                             *
 ********************************************************                
         DFHMSD TYPE=FINAL                                               
         END                                                             
+
+
+=====================================================================================================================
+
+Compilando o mapa
+
+
+GR.EAD569.JOBLIB(COMPMAPA) - 01.06
+
+//EAD569X JOB 'COMP MAPA',MSGCLASS=X,CLASS=C,NOTIFY=EAD569
+//*===================================================================
+//* JCL PARA COMPILAR MAPAS
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE
+//*===================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569M1,INSTR='EAD569'
+
+
+Comando para compilar: sub
+
+
+==========================================================================================================================
+
+No CICS vamos testar o mapa cadastrando o mapa dentro dos índices de pesquisa
+
+ceda
+def map 
+MAPSET ==> ad569m1
+GROUP  ==> ead569
+
+Para acessar o grupo:
+
+dis gr(ead569)
+Depois colocamos a letra i de install ao lado do grupo ead569 e apertamos enter
+
+ceci send map(ad569m1)
+
+cemt set prog(ad569m1) new - para fazer uma cópia nova
+
+
+
+
+
+
+
+
+
+
+
+
