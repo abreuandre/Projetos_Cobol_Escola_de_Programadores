@@ -51,7 +51,7 @@
                WHEN OTHER                                          
                    MOVE 'ERRO XXX NO RECEIVE'  TO  MSGO            
                    MOVE WK-RET-CICS  TO WK-RET-CICS-EDIT           
-                   MOVE WRK-RET-CICS-EDIT TO MSGO(6:3)             
+                   MOVE WK-RET-CICS-EDIT TO MSGO(6:3)             
                    EXEC CICS                                       
                        RETURN                                        
                    END-EXEC                                        
@@ -79,7 +79,7 @@
                    DIVIDE N1I BY N2I GIVING RESULTO            
                    MOVE 'DIVISAO EFETUADA' TO MSGO
                WHEN OTHER                          
-                   MOVE 'OPERACAO INVALIDA' TO MSGO.           
+                   MOVE 'OPERACAO INVALIDA' TO MSGO           
            END-EVALUATE.
            MOVE LOW-VALUES TO N1O N2O.                           
       **************************************                   
@@ -109,4 +109,48 @@
                    DATAONLY                                    
                    FROM(MAPCALCO)                              
                END-EXEC                                        
-           END-IF.                                                                                                                                    
+           END-IF.
+
+
+===========================================================================================================================
+
+Compilando o programa
+
+GR.EAD569.JOBLIB(COMPCICS) - 01.01
+
+//EAD569XX JOB 'EAD569',MSGCLASS=X,CLASS=C,NOTIFY=EAD569
+//*==================================================
+//* JCL PARA COMPILAR PROGRAMAS CICS
+//*  NAME - NOME DO SEU PROGRAMA
+//*  INSTR - SUA CHAVE
+//*==================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB
+//*
+//COMPPLI  EXEC DFHCICS1,NAME=AD569P1,INSTR='EAD569,'
+//         LIB2='GR.GERAL'
+
+
+===================================================================================================================
+
+No CICS
+
+Cadastrar o programa com o ceda
+
+ceda
+def prog
+PROGRAM  ==> AD569P1
+GROUP    ==> EAD569
+LANGUAGE ==> cobol
+
+
+def trans
+TRANSACTION ==> AAD1
+GROUP       ==> EAD569
+PROGRAM     ==> AD569P1
+
+dis gr(ead569)
+instalar o MAPSET, PROGRAM e TRANSACTION    
+
+cemt set prog(ad569p1) new
+
+Digitar o código da transação que é o AAD1                                                                                                                  

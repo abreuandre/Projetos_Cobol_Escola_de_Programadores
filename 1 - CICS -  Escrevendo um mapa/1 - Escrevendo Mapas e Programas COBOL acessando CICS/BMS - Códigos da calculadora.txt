@@ -86,9 +86,9 @@ N2      DFHMDF POS=(5,28),                                             *
                ATTRB=ASKIP                                              
 ********************************************************                
 RESULT  DFHMDF POS=(5,36),                                             *
-               LENGTH=08,                                              *
+               LENGTH=09,                                              *
                ATTRB=ASKIP,                                            *
-               PICOUT='ZZZZZZZ9'                                        
+               PICOUT='-ZZZZZZZ9'                                        
 ********************************************************                
 MSG     DFHMDF POS=(7,01),                                             *
                LENGTH=79,                                              *
