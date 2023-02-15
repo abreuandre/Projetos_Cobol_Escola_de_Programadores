@@ -157,5 +157,16 @@ MSG     DFHMDF POS=(15,01),
         DFHMSD TYPE=FINAL
         END
 
+===========================================================================================================================
 
+
+GR.EAD569.JOBLIB(COMPMAPA) - 01.03
+
+//EAD569X JOB 'COMP MAPA',MSGCLASS=X,CLASS=C,NOTIFY=&SYSUID        
+//*================================================================
+//* JCL PARA COMPILAR MAPAS                                        
+//*  NAME - SEU MAPA   -   INSTR = SUA CHAVE                       
+//*================================================================
+//         JCLLIB ORDER=GR.GERAL.PROCLIB                           
+//MAPSAMP  EXEC DFHMAPCS,NAME=AD569MB,INSTR='EAD569'
 

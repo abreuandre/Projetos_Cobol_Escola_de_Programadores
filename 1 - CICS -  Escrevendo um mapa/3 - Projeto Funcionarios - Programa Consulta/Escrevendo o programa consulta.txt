@@ -1,6 +1,26 @@
 Escrevendo o programa consulta - Parte 1
 
 
+GR.EAD569.COBLIB(TELACONS) - 01.01
+
+                        #CONSULTA FUNCIONARIOS                                 #XXXXXXXXXXXX
+                                                                               #XXXXXXXXXX
+
+              #CODIGO DO FUNCIONARIO#XXXX#
+
+              #NOME         :#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX#
+              #SALARIO      :#999999#,#99#
+              #DEPARTAMENTO :#XXX#
+              #ADMISSAO     :#99#/#99#/#9999#
+              #IDADE        :#99#
+              #EMAIL        :#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX#
+
+#F3-MENU F7-ANTERIOR F8-PROXIMO F12-EXIT
+
+#XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+============================================================================================================================
+
 GR.EAD569.COBLIB(AD569MB) - 01.01
 
 AD569MB DFHMSD TYPE=MAP,MODE=INOUT,LANG=COBOL,CTRL=FREEKB,TIOAPFX=YES
@@ -124,8 +144,8 @@ EMAIL   DFHMDF POS=(11,30),                                            *
                ATTRB=ASKIP,                                            *
                INITIAL='F3-MENU  F7-ANTERIOR  F8-PROXIMO  F12-EXIT'
 *****************************************************
-MSG     DFHMDF POS=(15,01),
-        LENGTH=79,
+MSG     DFHMDF POS=(15,01),                                            *
+        LENGTH=79,                                                     *
         ATTRB=ASKIP
 *****************************************************
         DFHMSD TYPE=FINAL
@@ -258,7 +278,7 @@ GR.EAD569.COBLIB(AD569PA) - 01.00
                 WHEN DFHRESP(NORMAL)                                    
                     CONTINUE                      
                 WHEN DFHRESP(PGMIDERR)                                   
-                    MOVE 'PROGRAMA XXXXXXXX' NÃO ENCONTRADO TO MSGO
+                    MOVE 'PROGRAMA XXXXXXXX NÃO ENCONTRADO' TO MSGO
                     MOVE WK-PROGRAMA TO MSGO(10:8)
                 WHEN OTHER                                              
                     MOVE 'ERRO XXX NO XCTL'  TO  MSGO                
@@ -321,6 +341,7 @@ GR.EAD569.JOBLIB(COMPCICS)
 //COMPPLI  EXEC DFHCICS1,NAME=AD569PA,INSTR='EAD569',     
 //         LIB2='GR.GERAL'             
 
+================================================================================================================
 
 
 
